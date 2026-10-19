@@ -1,5 +1,5 @@
 // Service worker: rete prima, cache come riserva
-const CACHE = "fos-v4";
+const CACHE = "fos-v5";
 const SHELL = ["./", "./index.html", "./config.js", "./manifest.json", "./icons/icon-192.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).catch(()=>{})); self.skipWaiting(); });
 self.addEventListener("activate", e => {

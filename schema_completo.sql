@@ -1,4 +1,4 @@
--- Francesco OS - DATABASE COMPLETO (v1 + v2 + v3)
+-- Francesco OS - DATABASE COMPLETO (v1 - v5)
 -- Supabase > SQL Editor > New query > incolla TUTTO > Run
 -- Sicuro da rilanciare: non cancella dati esistenti.
 
@@ -55,12 +55,16 @@ create table if not exists public.goals (
   progress    int  not null default 0 check (progress between 0 and 100),
   next_action text,
   deadline    date,
-  steps       jsonb not null default '[]'::jsonb,
+  steps       jsonb default '[]'::jsonb,
+  link        text,
   notes       text,
   sort        int not null default 0,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
+
+alter table public.goals add column if not exists link text;
+alter table public.goals alter column steps drop not null;
 
 create table if not exists public.weekly_reviews (
   id             bigint generated always as identity primary key,

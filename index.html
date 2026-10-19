@@ -387,7 +387,61 @@ async function fetchItems(){ const { data, error } = await sb.from("routine_item
 async function fetchDone(fromISO, toISO){ let q=sb.from("routine_done").select("*").gte("day",fromISO); if(toISO) q=q.lte("day",toISO);
   const { data, error } = await q; if (error) throw error; return data||[]; }
 async function fetchBody(){ const { data, error } = await sb.from("body_measurements").select("*").order("day"); if (error) throw error; return data||[]; }
-const goalProgress = g => (g.steps && g.steps.length) ? Math.round(g.steps.filter(s=>s.d).length/g.steps.length*100) : g.progress;
+/* collegamento obiettivi -> dati reali */
+let AUTO = {};
+const AUTO_MAP = [["sveglio alle 7:30","wake,gym"],["stretching","stretch"],["tennis","tennis"],["mangio equilibrato","food"],["bevo poco alcol","alc"],
+  ["medito","med"],["leggo per meditare","read"],["journaling","jour"],["regola 10 minuti","imp"],["parlo con calma","pres"],["parlo il 20%","pres"],
+  ["niente buffonate","iro"],["nel lavoro sono tranquillo","imp"],["2 contatti senior","sen"],["focus 90","focus"],["conosco persone nuove","conv"],
+  ["non inseguo","chase"],["cura estetica","dress"],["domenica sacra","rev:sunday_ok,nophone_ok"],["controllo spese","rev:spese_ok"],
+  ["1 libro al mese","rev:books"],["fisico da obiettivo","body"]];
+const LINK_OPTS = () => ({"":"Automatico (dal titolo)","none":"Nessuno: progresso manuale",
+  ...Object.fromEntries(TARGETS.map(T=>[T.k,"Check-in: "+T.l])), "wake,gym":"Check-in: Sveglia 7:30 + Palestra",
+  "rev:spese_ok":"Review: spese controllate","rev:sunday_ok,nophone_ok":"Review: domenica sacra + ora senza telefono","rev:books":"Review: libri finiti (1 al mese)",
+  "body":"Corpo: peso e girovita verso l'obiettivo"});
+function linkOf(g){
+  if (g.steps && g.steps.length) return null;
+  if (g.link==="none") return null;
+  if (g.link) return g.link;
+  const t=(g.title||"").toLowerCase(); const m=AUTO_MAP.find(([k])=>t.includes(k)); return m?m[1]:null;
+}
+async function refreshAuto(goals){
+  AUTO = {}; const today=new Date();
+  const links = goals.map(linkOf).filter(Boolean); if (!links.length) return;
+  const mon=mondayOf(today), el=dayOfWeek();
+  const [rows, revs, body] = await Promise.all([
+    fetchRows(localISO(addDays(mon,-21)),null).catch(()=>[]),
+    sb.from("weekly_reviews").select("*").gte("week_start",localISO(addDays(mon,-28))).then(r=>r.data||[]),
+    links.includes("body") ? fetchBody().catch(()=>[]) : Promise.resolve(null) ]);
+  if (body){ bodyRows=body; await loadSettings().catch(()=>{}); }
+  const weeks=[0,1,2,3].map(i=>{ const s=addDays(mon,-7*i), e=addDays(s,6);
+    return {rows:rows.filter(r=>r.day>=localISO(s)&&r.day<=localISO(e)), scale:i===0?el/7:1}; }).filter(w=>w.rows.length);
+  for (const g of goals){
+    const l=linkOf(g); if (!l) continue; let p=null, src="";
+    if (l==="body"){
+      const ps=["weight","waist"].map(k=>toTarget(k)).filter(Boolean).map(x=>x.p);
+      if (ps.length){ p=ps.reduce((a,b)=>a+b,0)/ps.length; src="dalle misure del corpo"; }
+    } else if (l.startsWith("rev:")){
+      const ks=l.slice(4).split(",");
+      if (revs.length){
+        if (ks[0]==="books"){ const b=revs.reduce((a,r)=>a+(r.books_finished||0),0); p=Math.min(1, b/Math.max(1,revs.length/4.3)); }
+        else { let ok=0,t=0; revs.forEach(r=>ks.forEach(k=>{ t++; if(r[k]) ok++; })); p=ok/t; }
+        src=`dalle ultime ${revs.length} review`;
+      }
+    } else {
+      const ps=[];
+      l.split(",").map(k=>TARGETS.find(T=>T.k===k)).filter(Boolean).forEach(T=>{
+        if (T.ty==="month"){ const r28=rows.filter(r=>r.day>=localISO(addDays(today,-27))); if (r28.length) ps.push(evalT(T,r28,28/30).p); }
+        else weeks.forEach(w=>{ const e=evalT(T,w.rows,T.ty==="max"?1:w.scale); if (e.p!=null) ps.push(e.p); });
+      });
+      if (ps.length){ p=ps.reduce((a,b)=>a+b,0)/ps.length; src=`dai check-in, ultime ${weeks.length} settiman${weeks.length===1?"a":"e"}`; }
+    }
+    AUTO[g.id] = {p: p==null?null:Math.round(p*100), src};
+  }
+}
+const goalProgress = g => (g.steps && g.steps.length) ? Math.round(g.steps.filter(s=>s.d).length/g.steps.length*100)
+  : (AUTO[g.id] && AUTO[g.id].p!=null ? AUTO[g.id].p : g.progress);
+const progSource = g => (g.steps && g.steps.length) ? "dalle tappe"
+  : AUTO[g.id] ? (AUTO[g.id].p==null ? "↻ collegato · stima iniziale finché non registri dati" : "↻ "+AUTO[g.id].src) : "manuale";
 
 /* ================= IMPOSTAZIONI (target corpo) ================= */
 const DEF_SET = { height:174, w_min:69, w_max:75, waist_aes:79, waist_health:94, chest_min:105, chest_max:107, arm:36, sh_min:110, sh_max:113, thigh:null, bf:null };
@@ -671,7 +725,7 @@ $("b-review").onclick = async ()=>{
 /* ================= OBIETTIVI ================= */
 let goals=[], gFilter="attivo", openGoal=null;
 async function loadGoals(){
-  try{ goals = await fetchGoals(); }catch(e){ $("g-list").innerHTML=`<div class="card err">${esc(e.message)}</div>`; return; }
+  try{ goals = await fetchGoals(); await refreshAuto(goals).catch(()=>{}); }catch(e){ $("g-list").innerHTML=`<div class="card err">${esc(e.message)}</div>`; return; }
   const cnt = s => goals.filter(g=>g.status===s && g.kind!=="identita").length;
   $("g-chips").innerHTML = [["attivo","Attivi"],["backlog","Backlog"],["raggiunto","Raggiunti"],["identita","Identità"]]
     .map(([k,l])=>`<button data-gf="${k}" class="${gFilter===k?"sel":""}">${l}${k!=="identita"?` (${cnt(k)})`:""}</button>`).join("");
@@ -686,7 +740,7 @@ async function loadGoals(){
     return `<div class="card"><h2>${AREAS[a]}</h2>${gs.map(g=>{ const p=goalProgress(g), open=openGoal===g.id;
       return `<div class="goal"><div class="t" data-go="${g.id}"><b>${esc(g.title)}</b><span class="pill">${KINDS[g.kind]||g.kind}</span></div>
         <div class="bar"><i style="width:${p}%;background:${colOf(p/100)}"></i></div>
-        <div class="mut" style="margin-top:4px">${p}%${g.metric?" · "+esc(g.metric):""}${g.deadline?" · entro "+g.deadline:""}</div>
+        <div class="mut" style="margin-top:4px">${p}% · <span style="color:${AUTO[g.id]&&AUTO[g.id].p!=null?"var(--acc)":"var(--mut)"}">${progSource(g)}</span>${g.deadline?" · entro "+g.deadline:""}</div>
         ${g.next_action?`<div style="font-size:14px;margin-top:4px">→ ${esc(g.next_action)}</div>`:""}
         ${open?`<div class="steps">${(g.steps||[]).map((s,i)=>`<div><input type="checkbox" data-gs="${g.id}" data-i="${i}" ${s.d?"checked":""}><span>${esc(s.t)}</span></div>`).join("")}</div>
           ${g.target?`<div class="mut" style="margin-top:6px">Target: ${esc(g.target)}</div>`:""}
@@ -712,8 +766,9 @@ function goalModal(g){
     <label class="f">Come lo misuro</label><input id="m-metric" value="${esc(g.metric)}">
     <label class="f">Target</label><input id="m-target" value="${esc(g.target)}">
     <label class="f">Prossima azione concreta</label><input id="m-next" value="${esc(g.next_action)}">
+    <label class="f">Il progresso si calcola da</label><select id="m-link">${Object.entries(LINK_OPTS()).map(([k,l])=>`<option value="${k}" ${k===(g.link||"")?"selected":""}>${l}</option>`).join("")}</select>
     <label class="f">Tappe (una per riga, * davanti a quelle fatte). Con le tappe il % si calcola da solo.</label><textarea id="m-steps" rows="5">${esc(stepsTxt)}</textarea>
-    <label class="f">Progresso manuale: <b id="m-pv">${g.progress||0}%</b> (solo senza tappe)</label><input id="m-prog" type="range" min="0" max="100" step="5" value="${g.progress||0}" style="padding:0">
+    <label class="f">Progresso manuale: <b id="m-pv">${g.progress||0}%</b> (usato solo senza tappe e senza collegamento, o finché non ci sono dati)</label><input id="m-prog" type="range" min="0" max="100" step="5" value="${g.progress||0}" style="padding:0">
     <label class="f">Note</label><textarea id="m-notes" rows="3">${esc(g.notes)}</textarea>
     <button class="btn" id="m-save">Salva</button><button class="btn sec" id="m-cancel">Annulla</button>${g.id?`<button class="btn del" id="m-del">Elimina</button>`:""}`;
   $("modal").classList.remove("hidden");
@@ -725,7 +780,7 @@ function goalModal(g){
     const ng={ ...(g.id?{id:g.id}:{}), title:$("m-title").value.trim()||"Senza titolo", area:kind==="identita"?"identita":$("m-area").value, kind,
       status:$("m-status").value, deadline:$("m-deadline").value||null, metric:$("m-metric").value.trim()||null, target:$("m-target").value.trim()||null,
       next_action:$("m-next").value.trim()||null, steps, progress:steps.length?Math.round(steps.filter(s=>s.d).length/steps.length*100):Number($("m-prog").value),
-      notes:$("m-notes").value.trim()||null };
+      notes:$("m-notes").value.trim()||null, link:$("m-link").value||null };
     if (await saveGoal(ng)){ $("modal").classList.add("hidden"); toast(); loadGoals(); }
   };
   if (g.id) $("m-del").onclick=async()=>{ if(!confirm("Eliminare questo obiettivo?")) return;
@@ -763,6 +818,7 @@ async function loadProg(){
   try{
     const from=addDays(mondayOf(today),-49);
     const [rows, gs, items, done, body] = await Promise.all([fetchRows(localISO(from),null), fetchGoals(), fetchItems().catch(()=>[]), fetchDone(localISO(addDays(today,-27)),null).catch(()=>[]), fetchBody().catch(()=>[])]);
+    await refreshAuto(gs).catch(()=>{});
     const sug=suggestPriorities(rows.filter(r=>r.day>=localISO(addDays(today,-13))));
     $("p-coach").innerHTML = insightHTML(computeInsights(rows,gs,items,done,body))
       + (sug.length?`<h3>Le 3 leve per la prossima settimana</h3>`+sug.map((x,i)=>`<div class="prio"><b>${i+1}. ${esc(x.T.l.replace(" (max)","").replace(" (media)",""))}</b> <span class="mut">(${x.T.ty==="max"?"oltre il limite":Math.round(x.p*100)+"% del target"})</span><br>${esc(x.a)}</div>`).join("")
@@ -883,7 +939,7 @@ const SEEDG = [
    S("Hobby scelto","4 sessioni","Primo progetto finito")]
 ];
 async function seedGoals(){
-  const rows=[...SEED.map(([a,k,t,n],i)=>({user_id:UID,area:a,kind:k,title:t,notes:n,status:"attivo",progress:0,sort:i})),
+  const rows=[...SEED.map(([a,k,t,n],i)=>({user_id:UID,area:a,kind:k,title:t,notes:n,status:"attivo",progress:0,steps:[],sort:i})),
     ...SEEDG.map(([a,k,t,m,tg,st,p,na,steps],i)=>({user_id:UID,area:a,kind:k,title:t,metric:m,target:tg,status:st,
       progress: steps&&steps.length ? Math.round(steps.filter(s=>s.d).length/steps.length*100) : p, next_action:na, steps:steps||[], sort:100+i}))];
   const { error } = await sb.from("goals").insert(rows); if (error) throw error;
@@ -960,7 +1016,7 @@ $("b-report").onclick=async()=>{
   const today=new Date(), rows=await fetchRows(localISO(addDays(today,-27)),null), gs=await fetchGoals();
   const [{ data:revs }, items, done, body] = await Promise.all([sb.from("weekly_reviews").select("*").order("week_start",{ascending:false}).limit(4),
     fetchItems().catch(()=>[]), fetchDone(localISO(addDays(today,-27)),null).catch(()=>[]), fetchBody().catch(()=>[])]);
-  await loadSettings();
+  await loadSettings(); await refreshAuto(gs).catch(()=>{});
   const sc=areaScores(rows,gs);
   let t=`FRANCESCO OS — report ${localISO(today)} (ultime 4 settimane, ${rows.length} giorni registrati)\n\nPUNTEGGI AREE\n`;
   for(const [a,l] of Object.entries(AREAS)){ const x=sc[a]; t+=`- ${l}: ${x.s==null?"n.d.":Math.round(x.s*100)} (abitudini ${x.hab==null?"n.d.":Math.round(x.hab*100)+"%"}, obiettivi ${x.gp==null?"n.d.":Math.round(x.gp*100)+"%"})\n`; }
