@@ -135,6 +135,17 @@ begin
   end loop;
 end $$;
 
+create or replace function public.ping()
+returns timestamptz
+language sql
+security definer
+set search_path = ''
+as $$ select now() $$;
+
+revoke all on function public.ping() from public;
+grant execute on function public.ping() to anon, authenticated;
+
+
 -- Check finale: 7 righe, tutte con rls = true
 select relname as tabella, relrowsecurity as rls from pg_class
 where relname in ('daily_checkins','goals','weekly_reviews','routine_items','routine_done','body_measurements','user_settings')

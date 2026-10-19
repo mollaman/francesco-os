@@ -135,6 +135,7 @@
 
   <!-- PROGRESSI -->
   <section id="v-prog" class="hidden">
+    <div class="card"><h2>🧠 Coach</h2><div class="mut" style="margin-bottom:6px">Analisi automatica dei tuoi dati. Più giorni registri, più è precisa.</div><div id="p-coach"><div class="mut">Calcolo…</div></div></div>
     <div class="card"><div class="mut">Punteggio complessivo (ultime 4 settimane)</div><div class="big" id="p-total">–</div>
       <div class="mut">60% aderenza alle abitudini + 40% avanzamento obiettivi attivi. Le settimane senza dati non contano.</div></div>
     <div class="card"><h2>Aderenza settimanale</h2><div class="chart"><canvas id="c-weeks"></canvas></div></div>
@@ -291,6 +292,88 @@ function evalT(T, rows, scale=1){
   const goal = T.t*scale; return {v, p: goal<=0 ? 1 : Math.min(1, v/goal)};
 }
 const colOf = p => p==null ? "var(--line)" : p>=.9 ? "var(--ok)" : p>=.5 ? "var(--warn)" : "var(--bad)";
+/* ================= COACH (analisi automatica, gratis, senza AI) ================= */
+const ACTIONS = {
+ wake:"Sveglia alle 7:30 con il telefono fuori dalla camera", gym:"Fissa adesso in calendario 3 giorni di palestra con l'orario",
+ tennis:"Prenota le 2 sessioni di tennis della settimana", stretch:"Stretching 10 minuti subito dopo la sveglia (modalità guidata)",
+ food:"Fai la spesa della settimana e prepara 3 pranzi", alc:"Decidi prima di uscire: massimo 2 drink",
+ med:"Meditazione 10 minuti prima di toccare il telefono", read:"10 minuti di lettura a letto al posto del telefono",
+ jour:"5 righe di journaling lunedì, mercoledì e venerdì sera", selfi:"Quando sbagli: «mi correggo, non mi distruggo» e scrivi cosa farai diversamente",
+ pres:"In ogni conversazione: pausa di 1 secondo e una domanda in più", imp:"Regola 10 minuti: bozza, attesa, rilettura, poi invio",
+ iro:"Invece della battuta: «Aspetta, ti spiego cosa intendo»", es:"20 minuti di spagnolo in calendario, 5 giorni",
+ fr:"20 minuti di francese, 3 giorni", en:"3 sessioni da 15 minuti di pronuncia inglese",
+ prio:"Ogni mattina scegli la One Big Thing e falla prima delle email", focus:"Blocca 90 minuti la mattina con le notifiche spente",
+ proj:"Blocca 3 ore per l'attività parallela (es. sabato mattina)", house:"Fissa 2 visite o chiama 1 banca per la pre-approvazione",
+ conv:"Avvia 1 conversazione nuova al giorno, energia calma", chase:"Un messaggio, poi silenzio. Nessun interesse = mi stacco",
+ dress:"Prepara i vestiti la sera prima", hobby:"Una sessione di hobby creativo nel weekend"
+};
+const CORE = new Set(["wake","gym","stretch","med","prio","es","imp","house"]);
+function suggestPriorities(rows){
+  if (rows.length<3) return [];
+  const sc=Math.max(1,rows.length/7);
+  return TARGETS.filter(T=>T.ty!=="month").map(T=>({T,p:evalT(T,rows,sc).p})).filter(x=>x.p!=null && x.p<.8)
+    .sort((a,b)=>(a.p-b.p)||((CORE.has(b.T.k)?1:0)-(CORE.has(a.T.k)?1:0))).slice(0,3).map(x=>({...x,a:ACTIONS[x.T.k]||x.T.l}));
+}
+function computeInsights(rows, goals, items, done, body){
+  const out=[], today=new Date(), byDay=Object.fromEntries(rows.map(r=>[r.day,r]));
+  const pct=v=>Math.round(v*100)+"%";
+  // 1. costanza
+  const reg=[...Array(14)].map((_,i)=>localISO(addDays(today,-i))).filter(d=>byDay[d]).length;
+  if (reg<10) out.push(["bad",`Hai registrato ${reg} giorni su 14. Sotto i 10 i numeri non sono affidabili: il check-in serale è la priorità numero zero.`]);
+  else out.push(["good",`Costanza nel registrare: ${reg} giorni su 14.`]);
+  // 2. serie
+  const streak=fn=>{ let s=0; for(let i=0;i<90;i++){ const r=byDay[localISO(addDays(today,-i))]; if(i===0 && (!r||!fn(r))) continue; if(r&&fn(r)) s++; else break; } return s; };
+  const sc=streak(()=>true), sm=streak(r=>N(r.meditation_min)>=10), sw=streak(r=>r.wake_730);
+  if (sc>=3) out.push(["good",`Serie di check-in: ${sc} giorni di fila.`]);
+  if (sm>=3) out.push(["good",`Meditazione: ${sm} giorni di fila.`]);
+  if (sw>=3) out.push(["good",`Sveglia alle 7:30: ${sw} giorni di fila.`]);
+  // 3. andamento settimana
+  const mon=mondayOf(today), tw=rows.filter(r=>r.day>=localISO(mon)), lw=rows.filter(r=>r.day>=localISO(addDays(mon,-7))&&r.day<localISO(mon));
+  const a=tw.length?weekScore(tw,dayOfWeek()/7):null, b=lw.length?weekScore(lw,1):null;
+  if (a!=null && b!=null){ const d=Math.round((a-b)*100); out.push([d>=0?"good":"warn",`Questa settimana sei al ${pct(a)} contro il ${pct(b)} della scorsa (${d>=0?"+":""}${d} punti).`]); }
+  // 4. confronti tra comportamenti
+  const cmp=(cond,val,minN=3)=>{ const A=rows.filter(cond), B=rows.filter(r=>!cond(r)); if(A.length<minN||B.length<minN) return null;
+    const m=x=>x.reduce((s,r)=>s+val(r),0)/x.length; return {a:m(A),b:m(B)}; };
+  let c=cmp(r=>r.wake_730, r=>(r.gym||r.tennis||r.other_sport)?1:0);
+  if (c && c.a-c.b>=.2) out.push(["warn",`Quando ti svegli alle 7:30 ti alleni il ${pct(c.a)} dei giorni, altrimenti il ${pct(c.b)}. La leva è la sveglia, non la motivazione.`]);
+  c=cmp(r=>N(r.meditation_min)>=10, r=>N(r.impulsive));
+  if (c && c.b-c.a>=.3) out.push(["good",`Nei giorni in cui mediti hai in media ${c.a.toFixed(1)} reazioni impulsive, negli altri ${c.b.toFixed(1)}. Per te la meditazione funziona.`]);
+  c=cmp(r=>r.priority_done, r=>r.day_quality==null?3:r.day_quality);
+  if (c && c.a-c.b>=.5) out.push(["good",`Nei giorni in cui chiudi la One Big Thing voti la giornata ${c.a.toFixed(1)}, negli altri ${c.b.toFixed(1)}.`]);
+  const nx=rows.map(r=>{ const n=byDay[localISO(addDays(new Date(r.day+"T12:00"),1))]; return n&&n.energy!=null?{d:N(r.alcohol_drinks),e:n.energy}:null; }).filter(Boolean);
+  const hi=nx.filter(x=>x.d>=2), lo=nx.filter(x=>x.d<2), me=x=>x.reduce((s,y)=>s+y.e,0)/x.length;
+  if (hi.length>=3 && lo.length>=3 && me(lo)-me(hi)>=.4) out.push(["warn",`Il giorno dopo 2+ drink la tua energia media è ${me(hi).toFixed(1)}, contro ${me(lo).toFixed(1)} negli altri giorni.`]);
+  // 5. giorni della settimana
+  const wd=["lunedì","martedì","mercoledì","giovedì","venerdì","sabato","domenica"], cnt=Array(7).fill(0), tot=Array(7).fill(0);
+  rows.forEach(r=>{ const i=(new Date(r.day+"T12:00").getDay()+6)%7; tot[i]++; if(r.gym||r.tennis||r.other_sport) cnt[i]++; });
+  const idx=[0,1,2,3,4,5,6].filter(i=>tot[i]>=3);
+  if (idx.length>=4){ const rt=i=>cnt[i]/tot[i]; const best=idx.reduce((x,y)=>rt(y)>rt(x)?y:x), worst=idx.reduce((x,y)=>rt(y)<rt(x)?y:x);
+    if (rt(best)-rt(worst)>=.4) out.push(["warn",`Ti alleni soprattutto il ${wd[best]} (${cnt[best]}/${tot[best]}) e quasi mai il ${wd[worst]} (${cnt[worst]}/${tot[worst]}). Fissa gli allenamenti sui giorni che funzionano.`]); }
+  // 6. routine
+  for (const r of ["mattina","sera"]){ const its=items.filter(i=>i.routine===r&&i.active); if(!its.length) continue; const ids=new Set(its.map(i=>i.id));
+    const used=new Set(done.filter(d=>ids.has(d.item_id)).map(d=>d.day));
+    if (used.size<5){ out.push(["warn",`Routine ${r} usata ${used.size} giorni su 28. Usa la modalità guidata: una voce alla volta, 2 tocchi.`]); continue; }
+    const rate=its.map(i=>({t:i.title, r:done.filter(d=>d.item_id===i.id).length/used.size})).sort((x,y)=>x.r-y.r).filter(x=>x.r<.5).slice(0,2);
+    if (rate.length) out.push(["warn",`Routine ${r}: salti spesso «${rate.map(x=>x.t).join("» e «")}» (${rate.map(x=>pct(x.r)).join(", ")}). Accorciala o spostala: meglio una routine corta fatta sempre.`]);
+    else out.push(["good",`Routine ${r}: nessuna voce sotto il 50% quando la usi.`]); }
+  // 7. corpo
+  const bw=body.filter(x=>x.weight!=null).slice(-6);
+  if (bw.length>=2){ const pts=bw.map(x=>({x:new Date(x.day+"T12:00").getTime()/6048e5, y:N(x.weight)})); const span=pts[pts.length-1].x-pts[0].x;
+    if (span>=2){ const mx=pts.reduce((s,p)=>s+p.x,0)/pts.length, my=pts.reduce((s,p)=>s+p.y,0)/pts.length;
+      const slope=pts.reduce((s,p)=>s+(p.x-mx)*(p.y-my),0)/pts.reduce((s,p)=>s+(p.x-mx)**2,0), cur=pts[pts.length-1].y;
+      if (cur>SET.w_max){ if (slope<=-0.1){ const w=(cur-SET.w_max)/-slope; const dt=addDays(today,Math.round(w*7));
+          out.push(["good",`Peso: ${slope.toFixed(2)} kg a settimana. A questo ritmo arrivi a ${SET.w_max} kg verso ${dt.toLocaleDateString("it-IT",{month:"long",year:"numeric"})}.`]);
+          if (slope<-1) out.push(["warn","Stai perdendo più di 1 kg a settimana: rischi di perdere anche muscolo. Più proteine, deficit meno aggressivo."]); }
+        else out.push(["bad",`Peso fermo o in salita (${slope>=0?"+":""}${slope.toFixed(2)} kg/settimana) e sei ${(cur-SET.w_max).toFixed(1)} kg sopra l'obiettivo. L'allenamento da solo non basta: la leva è l'alimentazione.`]); }
+      else if (cur>=SET.w_min) out.push(["good",`Peso nell'intervallo obiettivo (${SET.w_min}–${SET.w_max} kg).`]); } }
+  else out.push(["warn","Servono almeno 2 misure del corpo a distanza di 2 settimane per calcolare la tendenza."]);
+  // 8. obiettivi fermi
+  goals.filter(g=>g.status==="attivo"&&g.kind==="risultato"&&goalProgress(g)<100).map(g=>({g,d:Math.floor((today-new Date(g.updated_at))/864e5)}))
+    .filter(x=>x.d>=21).sort((x,y)=>y.d-x.d).slice(0,3)
+    .forEach(x=>out.push(["warn",`Fermo da ${x.d} giorni: «${x.g.title}». Prossima azione: ${x.g.next_action||"definiscila"}.`]));
+  const ord={bad:0,warn:1,good:2}; return out.sort((x,y)=>ord[x[0]]-ord[y[0]]);
+}
+const insightHTML = list => list.map(([l,t])=>`<div class="warn ${l==="good"?"good":""}" style="${l==="bad"?"border-left-color:var(--bad)":""}">${esc(t)}</div>`).join("");
 function weekScore(rows, scale){ const ps=TARGETS.filter(T=>T.ty!=="month").map(T=>evalT(T,rows,scale).p).filter(p=>p!=null); return ps.length?ps.reduce((a,b)=>a+b,0)/ps.length:null; }
 
 /* ================= DATI ================= */
@@ -317,14 +400,18 @@ async function loadFocus(){
   const mon=mondayOf(new Date()), today=new Date(), tISO=localISO(today);
   const elapsed = dayOfWeek();
   try{
-    const [rows, rev, items, done, body] = await Promise.all([ fetchRows(localISO(mon), localISO(addDays(mon,6))),
+    const [rows, rev, items, done, body, rows14] = await Promise.all([ fetchRows(localISO(mon), localISO(addDays(mon,6))),
       sb.from("weekly_reviews").select("*").eq("week_start", localISO(addDays(mon,-7))).maybeSingle(),
-      fetchItems(), fetchDone(tISO, tISO), fetchBody() ]);
+      fetchItems(), fetchDone(tISO, tISO), fetchBody(), fetchRows(localISO(addDays(today,-13)),null) ]);
     const r = rev.data, doneIds=new Set(done.map(d=>d.item_id));
     let h = `<h2>Focus della settimana</h2>`;
     const pr=[r?.p1,r?.p2,r?.p3].filter(Boolean);
     h += pr.length ? pr.map((p,i)=>`<div class="prio"><b>${i+1}.</b> ${esc(p)}</div>`).join("")
-                   : `<div class="mut">Nessuna priorità impostata. Falle nella review di domenica (tab Settimana).</div>`;
+                   : (()=>{ const sg=suggestPriorities(rows14); return sg.length
+                       ? `<div class="mut">Suggerite dai tuoi dati (confermale nella review di domenica):</div>`+sg.map((x,i)=>`<div class="prio"><b>${i+1}.</b> ${esc(x.a)}</div>`).join("")
+                       : `<div class="mut">Nessuna priorità ancora. Dopo 3 check-in le suggerisco io; poi le confermi nella review di domenica.</div>`; })();
+    const lb=SET.last_backup; const bd=lb?Math.floor((today-new Date(lb+"T12:00"))/864e5):null;
+    if (bd==null || bd>=30) h += `<div class="warn">${bd==null?"Non hai ancora fatto un backup.":`Ultimo backup ${bd} giorni fa.`} Una volta al mese: ⚙︎ → Esporta tutto.</div>`;
     // routine di oggi
     const rt = ["mattina","sera"].map(k=>{ const its=items.filter(i=>i.routine===k&&i.active); return {k, n:its.length, d:its.filter(i=>doneIds.has(i.id)).length}; });
     h += `<h3>Routine di oggi</h3><div class="grid2">${rt.map(x=>`<button class="tile" data-v="routine" data-rt="${x.k}" style="text-align:left;color:var(--txt)">
@@ -564,9 +651,12 @@ async function loadWeek(){
 }
 function renderReview(){
   $("w-review").innerHTML = REVIEW_TXT.map(([k,l])=>`<label class="f">${l}</label>${k.startsWith("p")?`<input data-r="${k}" value="${esc(rev[k])}">`:`<textarea data-r="${k}" rows="2">${esc(rev[k])}</textarea>`}`).join("")
-   + `<h3>Check settimanali</h3>` + REVIEW_BOOL.map(([k,l])=>`<div class="row"><span>${l}</span><button class="tog ${rev[k]?"on":""}" data-rb="${k}"></button></div>`).join("")
+   + `<button class="btn sec" id="b-sug" type="button">✨ Suggerisci le priorità dai dati</button>` + `<h3>Check settimanali</h3>` + REVIEW_BOOL.map(([k,l])=>`<div class="row"><span>${l}</span><button class="tog ${rev[k]?"on":""}" data-rb="${k}"></button></div>`).join("")
    + `<div class="row"><span>Libri finiti questa settimana</span><div class="step"><button data-rn="-1">−</button><span id="rv-books">${rev.books_finished||0}</span><button data-rn="1">+</button></div></div>`
    + `<div class="row"><span>Voto alla settimana</span><div class="dots" id="rv-rate">${[1,2,3,4,5].map(n=>`<button class="${rev.rating===n?"sel":""}" data-rr="${n}">${n}</button>`).join("")}</div></div>`;
+  $("b-sug").onclick=async()=>{ const rows=await fetchRows(localISO(addDays(new Date(),-13)),null); const sg=suggestPriorities(rows);
+    if(!sg.length) return alert("Servono almeno 3 check-in negli ultimi 14 giorni, oppure sei già sopra l'80% ovunque.");
+    sg.forEach((x,i)=>{ const el=document.querySelector(`[data-r="p${i+1}"]`); if(el) el.value=x.a; }); toast("Priorità suggerite ✓"); };
 }
 $("b-review").onclick = async ()=>{
   $("rev-err").textContent="";
@@ -672,7 +762,11 @@ async function loadProg(){
   const today=new Date();
   try{
     const from=addDays(mondayOf(today),-49);
-    const [rows, gs, items, done] = await Promise.all([fetchRows(localISO(from),null), fetchGoals(), fetchItems().catch(()=>[]), fetchDone(localISO(addDays(today,-13)),null).catch(()=>[])]);
+    const [rows, gs, items, done, body] = await Promise.all([fetchRows(localISO(from),null), fetchGoals(), fetchItems().catch(()=>[]), fetchDone(localISO(addDays(today,-27)),null).catch(()=>[]), fetchBody().catch(()=>[])]);
+    const sug=suggestPriorities(rows.filter(r=>r.day>=localISO(addDays(today,-13))));
+    $("p-coach").innerHTML = insightHTML(computeInsights(rows,gs,items,done,body))
+      + (sug.length?`<h3>Le 3 leve per la prossima settimana</h3>`+sug.map((x,i)=>`<div class="prio"><b>${i+1}. ${esc(x.T.l.replace(" (max)","").replace(" (media)",""))}</b> <span class="mut">(${x.T.ty==="max"?"oltre il limite":Math.round(x.p*100)+"% del target"})</span><br>${esc(x.a)}</div>`).join("")
+        +`<div class="mut">Le trovi già pronte nella review di domenica con il pulsante «Suggerisci dai dati».</div>`:"");
     const r28=rows.filter(r=>r.day>=localISO(addDays(today,-34)));
     const sc=areaScores(r28,gs), vals=Object.values(sc).map(x=>x.s).filter(x=>x!=null);
     $("p-total").textContent = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*100) : "–";
@@ -858,7 +952,8 @@ function toCSV(rows){ const cols=Object.keys(rows[0]).filter(c=>c!=="user_id"); 
   return "\ufeff"+[cols.join(";"),...rows.map(r=>cols.map(c=>q(r[c])).join(";"))].join("\n"); }
 $("b-json").onclick=async()=>{ const [c,g,r,it,b,s]=await Promise.all([fetchRows(), fetchGoals(), sb.from("weekly_reviews").select("*").order("week_start"), fetchItems(), fetchBody(), sb.from("user_settings").select("*")]);
   const d = await sb.from("routine_done").select("*").order("day");
-  download(`francesco-os-${localISO(new Date())}.json`, JSON.stringify({exported:new Date().toISOString(), checkins:c, goals:g, reviews:r.data||[], routine_items:it, routine_done:d.data||[], body:b, settings:s.data||[]},null,2),"application/json"); };
+  download(`francesco-os-${localISO(new Date())}.json`, JSON.stringify({exported:new Date().toISOString(), checkins:c, goals:g, reviews:r.data||[], routine_items:it, routine_done:d.data||[], body:b, settings:s.data||[]},null,2),"application/json");
+  SET.last_backup=localISO(new Date()); await saveSettings(); toast("Backup scaricato ✓"); };
 $("b-csv").onclick=async()=>{ const rows=await fetchRows(); if(!rows.length) return alert("Nessun dato"); download(`checkin-${localISO(new Date())}.csv`,toCSV(rows),"text/csv"); };
 $("b-csvbody").onclick=async()=>{ const rows=await fetchBody(); if(!rows.length) return alert("Nessun dato"); download(`corpo-${localISO(new Date())}.csv`,toCSV(rows),"text/csv"); };
 $("b-report").onclick=async()=>{
@@ -878,7 +973,16 @@ $("b-report").onclick=async()=>{
   t+=`\n\nOBIETTIVI ATTIVI\n`+gs.filter(g=>g.status==="attivo"&&g.kind!=="identita").map(g=>`- [${AREAS[g.area]||g.area}] ${g.title}: ${goalProgress(g)}% → ${g.next_action||"-"}`).join("\n");
   t+=`\n\nREVIEW RECENTI\n`+(revs||[]).map(r=>`${r.week_start}: meglio="${r.best||""}" · debole="${r.weak||""}" · fermo="${r.stalled||""}" · priorità=${[r.p1,r.p2,r.p3].filter(Boolean).join(" | ")}`).join("\n");
   t+=`\n\nNOTE GIORNALIERE\n`+rows.filter(r=>r.note).map(r=>`${r.day}: ${r.note}`).join("\n");
-  t+=`\n\nAnalizza questi dati come un coach diretto: cosa sta migliorando, cosa peggiora, dove mi racconto storie (intenzioni senza azioni), cosa dice il corpo rispetto agli allenamenti, e dammi solo 3 priorità per la prossima settimana basate sui dati.`;
+  t+=`\n\nINSIGHT AUTOMATICI\n`+computeInsights(rows,gs,items,done,body).map(([l,x])=>`- [${l}] ${x}`).join("\n");
+  t+=`\n\n---\nSei il mio coach personale. Regole:
+1. Usa SOLO questi dati. Se un dato manca, dillo; non inventare nulla.
+2. Distingui intenzioni (cosa dico di voler fare), attività (cosa ho fatto) e risultati (cosa è cambiato).
+3. Dimmi in modo diretto dove mi sto raccontando storie.
+4. Cita i numeri su cui basi ogni giudizio.
+5. Collega il corpo (misure) ad allenamenti, alimentazione e alcol registrati.
+6. Dimmi quale obiettivo dovrei mettere in backlog per liberare energia, se ce n'è uno.
+7. Chiudi con massimo 3 priorità per la prossima settimana: azione concreta, quando la faccio, come la misuro.
+Niente teoria, niente elogi senza prove. Rispondi in italiano.`;
   try{ await navigator.clipboard.writeText(t); toast("Report copiato ✓"); }catch(e){ download("report.txt",t,"text/plain"); }
 };
 
