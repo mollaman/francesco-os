@@ -11,44 +11,79 @@
 <meta name="apple-mobile-web-app-title" content="Francesco OS">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <style>
-  :root{--bg:#0f172a;--card:#1e293b;--line:#334155;--txt:#e2e8f0;--mut:#94a3b8;--acc:#38bdf8;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+  :root{--bg:#0f172a;--card:#1e293b;--line:#334155;--txt:#e2e8f0;--mut:#94a3b8;--acc:#38bdf8;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;--yel:#facc15}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top) 0 calc(80px + env(safe-area-inset-bottom))}
-  header{padding:16px 16px 4px;display:flex;justify-content:space-between;align-items:center}
-  h1{font-size:20px;margin:0} h2{font-size:17px;margin:0 0 10px}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top) 0 calc(84px + env(safe-area-inset-bottom))}
+  header{padding:14px 16px 4px;display:flex;justify-content:space-between;align-items:center;max-width:600px;margin:auto;gap:8px}
+  h1{font-size:20px;margin:0} h2{font-size:17px;margin:0 0 8px} h3{font-size:13px;margin:14px 0 4px;color:var(--acc);text-transform:uppercase;letter-spacing:.04em}
   .mut{color:var(--mut);font-size:13px}
-  main{padding:8px 16px;max-width:560px;margin:auto}
+  main{padding:8px 14px;max-width:600px;margin:auto}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
   .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);gap:10px}
   .row:last-child{border-bottom:0}
   .tog{width:52px;height:30px;border-radius:30px;background:var(--line);position:relative;border:0;flex:none}
   .tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.15s}
-  .tog.on{background:var(--ok)} .tog.on::after{left:25px}
+  .tog.on{background:var(--ok)} .tog.on::after{left:25px} .tog.neg.on{background:var(--bad)}
   .step{display:flex;align-items:center;gap:6px;flex:none}
   .step button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--txt);font-size:18px}
   .step span{min-width:38px;text-align:center;font-weight:600}
-  .dots{display:flex;gap:6px} .dots button{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--txt);font-weight:600}
+  .dots{display:flex;gap:5px;flex:none} .dots button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--txt);font-weight:600}
   .dots button.sel{background:var(--acc);color:#0f172a;border-color:var(--acc)}
-  textarea,input{width:100%;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
-  .btn{width:100%;padding:14px;border-radius:12px;border:0;background:var(--acc);color:#0f172a;font-weight:700;font-size:16px;margin-top:6px}
+  textarea,input,select{width:100%;background:var(--bg);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
+  label.f{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
+  .btn{width:100%;padding:14px;border-radius:12px;border:0;background:var(--acc);color:#0f172a;font-weight:700;font-size:16px;margin-top:8px}
   .btn.sec{background:var(--card);color:var(--txt);border:1px solid var(--line)}
-  nav{position:fixed;bottom:0;left:0;right:0;background:#0b1222;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
-  nav button{flex:1;background:none;border:0;color:var(--mut);padding:12px 0;font-size:13px}
+  .btn.del{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+  .btn.yel{background:var(--yel);color:#1a1a1a}
+  .ibtn{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:6px 10px;font-size:15px}
+  nav{position:fixed;bottom:0;left:0;right:0;background:#0b1222;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+  nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 0 11px;font-size:11px;min-width:0}
+  nav button b{display:block;font-size:18px;margin-bottom:2px}
   nav button.act{color:var(--acc);font-weight:700}
   .bar{height:8px;background:var(--bg);border-radius:8px;overflow:hidden;margin-top:6px}
   .bar i{display:block;height:100%;background:var(--acc)}
-  .big{font-size:34px;font-weight:800}
-  .pill{font-size:12px;padding:3px 8px;border-radius:20px;background:var(--bg);border:1px solid var(--line)}
+  .big{font-size:38px;font-weight:800;line-height:1.1}
+  .pill{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--mut);white-space:nowrap}
+  .chips{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto}
+  .chips button{padding:8px 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--txt);white-space:nowrap}
+  .chips button.sel{background:var(--acc);color:#0f172a;border-color:var(--acc);font-weight:700}
   .hist{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
   .hist div{aspect-ratio:1;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-size:11px;display:flex;align-items:center;justify-content:center}
-  .toast{position:fixed;left:50%;bottom:95px;transform:translateX(-50%);background:var(--ok);color:#06210f;padding:10px 16px;border-radius:10px;font-weight:700;display:none;z-index:9}
-  .hidden{display:none}
+  .goal{padding:10px 0;border-bottom:1px solid var(--line)} .goal:last-child{border-bottom:0}
+  .goal .t{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .goal .t b{font-weight:600}
+  .steps{margin-top:8px} .steps div{display:flex;gap:8px;align-items:center;padding:5px 0;font-size:14px}
+  .steps input{width:20px;height:20px;flex:none}
+  .warn{border-left:3px solid var(--warn);padding:6px 10px;margin:6px 0;background:var(--bg);border-radius:6px;font-size:14px}
+  .good{border-left-color:var(--ok)}
+  .prio{padding:8px 10px;background:var(--bg);border-radius:8px;margin:6px 0;font-size:15px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{background:var(--bg);border-radius:12px;padding:10px;border:1px solid var(--line)}
+  .tile .n{font-size:24px;font-weight:800} .tile .l{font-size:12px;color:var(--mut)} .tile .d{font-size:12px;margin-top:2px}
+  .chart{position:relative;height:210px}
+  .ritem{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:12px;margin:6px 0;border:1px solid var(--line)}
+  .ritem .e{font-size:20px;width:26px;text-align:center;flex:none}
+  .ritem .tt{flex:1;font-size:15px;font-weight:600;min-width:0}
+  .ritem .tt small{display:block;font-weight:400;color:var(--mut);font-size:12px}
+  .ritem.done .tt{color:var(--mut);text-decoration:line-through}
+  .chk{width:30px;height:30px;border-radius:50%;border:2px solid var(--mut);background:none;flex:none;color:#0f172a;font-weight:900}
+  .chk.on{background:var(--ok);border-color:var(--ok)}
+  .ctx{white-space:pre-line;font-size:14px;color:var(--txt);background:var(--bg);border-radius:10px;padding:10px;margin:-2px 0 8px;border:1px dashed var(--line)}
+  .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--ok);color:#06210f;padding:10px 16px;border-radius:10px;font-weight:700;display:none;z-index:30}
+  .hidden{display:none!important}
   .err{color:var(--bad);font-size:14px;margin-top:8px}
+  #modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+  #modal .sheet{background:var(--card);width:100%;max-width:600px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+  #guide{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom))}
+  #guide .gx{flex:1;display:flex;flex-direction:column;justify-content:center;text-align:center;overflow:auto}
+  #guide .ge{font-size:64px} #guide .gt{font-size:24px;font-weight:800;margin:12px 0}
+  #guide .timer{font-size:46px;font-weight:800;color:var(--yel);font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
 
-<header><div><h1>Francesco OS</h1><div class="mut" id="sub"></div></div><span class="pill" id="who"></span></header>
+<header><div><h1>Francesco OS</h1><div class="mut" id="sub"></div></div>
+  <div style="display:flex;gap:6px;align-items:center"><span class="pill" id="who"></span><button class="ibtn hidden" id="b-more" data-v="more">⚙︎</button></div></header>
 
 <main>
   <!-- LOGIN -->
@@ -65,53 +100,84 @@
 
   <!-- OGGI -->
   <section id="v-today" class="hidden">
-    <div class="card">
-      <div class="row"><b>Giorno</b><input id="day" type="date" style="width:auto"></div>
-    </div>
-    <div class="card"><h2>Corpo</h2><div id="f-body"></div></div>
-    <div class="card"><h2>Mente e calma</h2><div id="f-mind"></div></div>
-    <div class="card"><h2>Esecuzione</h2><div id="f-exec"></div></div>
-    <div class="card"><h2>Stato</h2>
-      <div class="row"><span>Energia</span><div class="dots" data-k="energy"></div></div>
-      <div class="row"><span>Giornata</span><div class="dots" data-k="day_quality"></div></div>
-      <div style="padding-top:10px"><textarea id="note" rows="3" placeholder="Nota (cosa è andato bene / male)"></textarea></div>
-    </div>
+    <div class="card" id="t-focus"></div>
+    <div class="card"><div class="row"><b>Check-in del giorno</b><input id="day" type="date" style="width:auto"></div>
+      <div class="mut">Le voci collegate alla routine (sveglia, stretching, meditazione, One Big Thing) si compilano da sole.</div></div>
+    <div id="t-form"></div>
+    <div class="card"><h2>Nota</h2><textarea id="note" rows="3" placeholder="Cosa è andato bene, cosa no, cosa hai imparato"></textarea></div>
     <button class="btn" id="b-save">Salva check-in</button>
     <div class="err" id="save-err"></div>
   </section>
 
-  <!-- SETTIMANA -->
-  <section id="v-week" class="hidden">
-    <div class="card"><div class="mut" id="w-range"></div><div class="big" id="w-score"></div><div class="mut">aderenza ai target della settimana</div></div>
-    <div class="card" id="w-list"></div>
+  <!-- ROUTINE -->
+  <section id="v-routine" class="hidden">
+    <div class="chips" id="r-chips"></div>
+    <div id="r-body"></div>
   </section>
 
-  <!-- STORICO -->
-  <section id="v-hist" class="hidden">
-    <div class="card"><h2>Ultimi 35 giorni</h2><div class="mut" style="margin-bottom:8px">Numero = abitudini chiave fatte (palestra/tennis, stretching, meditazione, spagnolo, priorità)</div><div class="hist" id="h-grid"></div></div>
-    <div class="card"><h2>Medie 30 giorni</h2><div id="h-avg"></div></div>
+  <!-- CORPO -->
+  <section id="v-body" class="hidden"><div id="b-body"></div></section>
+
+  <!-- SETTIMANA -->
+  <section id="v-week" class="hidden">
+    <div class="card"><div class="mut" id="w-range"></div><div class="big" id="w-score"></div><div class="mut">aderenza ai target della settimana (ritmo atteso a oggi)</div></div>
+    <div id="w-list"></div>
+    <div class="card"><h2>Review settimanale</h2><div class="mut">Domenica, 10 minuti. Le 3 priorità compaiono ogni giorno nella schermata Oggi.</div><div id="w-review"></div>
+      <button class="btn" id="b-review">Salva review</button><div class="err" id="rev-err"></div></div>
+  </section>
+
+  <!-- OBIETTIVI -->
+  <section id="v-goals" class="hidden">
+    <div class="chips" id="g-chips"></div>
+    <div id="g-list"></div>
+    <button class="btn sec" id="b-newgoal">+ Nuovo obiettivo</button>
+  </section>
+
+  <!-- PROGRESSI -->
+  <section id="v-prog" class="hidden">
+    <div class="card"><div class="mut">Punteggio complessivo (ultime 4 settimane)</div><div class="big" id="p-total">–</div>
+      <div class="mut">60% aderenza alle abitudini + 40% avanzamento obiettivi attivi. Le settimane senza dati non contano.</div></div>
+    <div class="card"><h2>Aderenza settimanale</h2><div class="chart"><canvas id="c-weeks"></canvas></div></div>
+    <div class="card"><h2>Aree</h2><div class="chart" style="height:260px"><canvas id="c-radar"></canvas></div><div id="p-areas"></div></div>
+    <div class="card"><h2>Routine completata (14 giorni)</h2><div class="chart"><canvas id="c-routine"></canvas></div></div>
+    <div class="card"><h2>Energia e calma (30 giorni)</h2><div class="chart"><canvas id="c-mood"></canvas></div></div>
+    <div class="card"><h2>Identità — ultimi 14 giorni</h2><div class="mut" style="margin-bottom:6px">Quanto i comportamenti registrati confermano chi vuoi essere</div><div id="p-id"></div></div>
+    <div class="card"><h2>Ultimi 35 giorni</h2><div class="mut" style="margin-bottom:8px">Numero = abitudini chiave fatte su 6 (sveglia, sport, stretching, meditazione, spagnolo, priorità)</div><div class="hist" id="h-grid"></div></div>
+    <div class="card"><h2>Questo mese</h2><div id="p-month"></div></div>
   </section>
 
   <!-- ALTRO -->
   <section id="v-more" class="hidden">
+    <div class="card"><h2>Report per il coach</h2><div class="mut">Copia il riepilogo delle ultime 4 settimane (abitudini, routine, corpo, obiettivi, note) e incollalo in Copilot.</div>
+      <button class="btn" id="b-report">Copia report</button></div>
     <div class="card"><h2>Backup</h2>
-      <button class="btn sec" id="b-json">Esporta JSON</button>
-      <button class="btn sec" id="b-csv">Esporta CSV (Excel)</button>
+      <button class="btn sec" id="b-json">Esporta tutto (JSON)</button>
+      <button class="btn sec" id="b-csv">Esporta check-in (CSV per Excel)</button>
+      <button class="btn sec" id="b-csvbody">Esporta misure corpo (CSV)</button>
     </div>
+    <div class="card"><h2>Ripristino liste iniziali</h2><div class="mut">Solo se le hai svuotate per errore.</div>
+      <button class="btn sec" id="b-seed">Carica obiettivi iniziali</button>
+      <button class="btn sec" id="b-seedr">Carica routine iniziale</button></div>
     <div class="card"><h2>Account</h2><button class="btn sec" id="b-logout">Esci</button></div>
   </section>
 </main>
 
+<div id="modal" class="hidden"><div class="sheet" id="m-body"></div></div>
+<div id="guide" class="hidden"></div>
+
 <nav id="nav" class="hidden">
-  <button data-v="today" class="act">Oggi</button>
-  <button data-v="week">Settimana</button>
-  <button data-v="hist">Storico</button>
-  <button data-v="more">Altro</button>
+  <button data-v="today" class="act"><b>●</b>Oggi</button>
+  <button data-v="routine"><b>☀︎</b>Routine</button>
+  <button data-v="body"><b>◆</b>Corpo</button>
+  <button data-v="week"><b>▦</b>Settimana</button>
+  <button data-v="goals"><b>◎</b>Obiettivi</button>
+  <button data-v="prog"><b>↗</b>Progressi</button>
 </nav>
 <div class="toast" id="toast">Salvato ✓</div>
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
 const C = window.APP_CONFIG || {};
 const $ = id => document.getElementById(id);
@@ -120,135 +186,757 @@ if (!C.SUPABASE_URL || C.SUPABASE_URL.startsWith("INCOLLA")) {
   throw new Error("config mancante");
 }
 const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_KEY);
-
-/* ---------- campi del check-in ---------- */
-const FIELDS = {
-  body: [["gym","Palestra","bool"],["tennis","Tennis","bool"],["stretching_min","Stretching (min)","num",5]],
-  mind: [["meditation_min","Meditazione (min)","num",5],["impulsive","Reazioni impulsive","num",1],["pause_used","Ho fatto la pausa prima di rispondere","bool"]],
-  exec: [["priority_done","Priorità del giorno fatta","bool"],["spanish_min","Spagnolo attivo (min)","num",10],["english_pron","Pronuncia inglese","bool"],
-         ["house_action","Azione concreta casa","bool"],["project_hours","Ore progetto parallelo","num",0.5],["senior_contact","Contatto senior","bool"]]
-};
-const ALLKEYS = Object.values(FIELDS).flat().map(f=>f[0]).concat(["energy","day_quality","note"]);
-let state = {};
-
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const localISO = d => { const z=new Date(d.getTime()-d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
-const blank = () => { const s={}; Object.values(FIELDS).flat().forEach(([k,,t])=>s[k]=t==="bool"?false:0); s.energy=null;s.day_quality=null;s.note=""; return s; };
+const mondayOf = d => { const x=new Date(d); x.setHours(12,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
+const addDays = (d,n) => { const x=new Date(d); x.setHours(12,0,0,0); x.setDate(x.getDate()+n); return x; };
+const dayOfWeek = () => ((new Date().getDay()+6)%7)+1;
+const fmtD = iso => { const [y,m,d]=iso.split("-"); return `${d}/${m}`; };
+const toast = (m="Salvato ✓") => { const t=$("toast"); t.textContent=m; t.style.display="block"; setTimeout(()=>t.style.display="none",1500); };
+const N = v => Number(v)||0;
+let UID = null, dirtyDay = false;
+
+/* ================= GRAFICI ================= */
+const charts = {};
+if (window.Chart){ Chart.defaults.color="#94a3b8"; Chart.defaults.borderColor="#334155"; Chart.defaults.font.size=11; Chart.defaults.maintainAspectRatio=false; }
+function drawChart(id, cfg){
+  if (!window.Chart) return; if (charts[id]) charts[id].destroy();
+  const el=$(id); if (!el) return; charts[id]=new Chart(el, cfg);
+}
+const refLine = (label, n, val, color) => ({label, data:Array(n).fill(val), borderColor:color, borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false});
+
+/* ================= AREE ================= */
+const AREAS = {corpo:"Corpo & Salute", mente:"Mente & Calma", comunicazione:"Comunicazione & Presenza", lingue:"Lingue",
+  carriera:"Carriera & Business", finanze:"Finanze & Casa", sociale:"Sociale & Stile"};
+const KINDS = {risultato:"Risultato", abitudine:"Abitudine", regola:"Regola", identita:"Identità"};
+
+/* ================= CHECK-IN ================= */
+const SECTIONS = [
+  ["corpo", [["wake_730","Sveglia alle 7:30","bool"],["gym","Palestra","bool"],["tennis","Tennis","bool"],["other_sport","Altro sport (surf, judo…)","bool"],
+             ["stretching_min","Stretching (min)","num",5],["healthy_food","Mangiato equilibrato","bool"],["alcohol_drinks","Drink alcolici","num",1]]],
+  ["mente", [["meditation_min","Meditazione (min)","num",5],["reading_min","Lettura per rallentare (min)","num",5],["journaling","Journaling","bool"],
+             ["self_insult","Mi sono auto-insultato","neg"]]],
+  ["comunicazione", [["presence","Calma, lentezza, parlo il 20% (1-5)","rate"],["impulsive","Reazioni impulsive / a caldo","num",1],
+             ["pause_used","Ho usato la pausa / regola 10 min","bool"],["irony_defense","Ironia o buffonate come difesa","num",1]]],
+  ["lingue", [["spanish_min","Spagnolo attivo (min)","num",10],["french_min","Francese (min)","num",10],["english_pron","Pronuncia inglese (15 min)","bool"]]],
+  ["carriera", [["priority_done","Priorità del giorno fatta (One Big Thing)","bool"],["focus_90","Focus 90 min senza distrazioni","bool"],
+             ["project_hours","Ore progetto / attività parallela","num",0.5],["senior_contact","Nuovo contatto senior","bool"]]],
+  ["finanze", [["house_action","Azione concreta casa (visita, banca, offerta)","bool"]]],
+  ["sociale", [["new_conversations","Persone nuove conosciute","num",1],["chased","Ho inseguito / messaggi a raffica","neg"],
+             ["dressed_well","Curato e vestito bene","bool"],["creative_hobby","Hobby creativo","bool"]]],
+  ["stato", [["energy","Energia (1-5)","rate"],["day_quality","Giornata (1-5)","rate"]]]
+];
+const FIELDS = SECTIONS.flatMap(s=>s[1]);
+const KEYS = FIELDS.map(f=>f[0]).concat(["note"]);
+let state = {};
+const blank = () => { const s={}; FIELDS.forEach(([k,,t])=> s[k] = t==="rate" ? null : (t==="num" ? 0 : false)); s.note=""; return s; };
 
 function renderForm(){
-  for (const [grp,list] of Object.entries(FIELDS)){
-    $("f-"+grp).innerHTML = list.map(([k,l,t,st])=> t==="bool"
-      ? `<div class="row"><span>${l}</span><button class="tog ${state[k]?"on":""}" data-k="${k}"></button></div>`
-      : `<div class="row"><span>${l}</span><div class="step"><button data-k="${k}" data-d="-${st}">−</button><span id="n-${k}">${state[k]}</span><button data-k="${k}" data-d="${st}">+</button></div></div>`).join("");
-  }
-  document.querySelectorAll(".dots").forEach(el=>{
-    const k=el.dataset.k; el.innerHTML=[1,2,3,4,5].map(n=>`<button class="${state[k]===n?"sel":""}" data-n="${n}">${n}</button>`).join("");
-  });
-  $("note").value = state.note||"";
+  $("t-form").innerHTML = SECTIONS.map(([a,list])=>`<div class="card"><h2>${a==="stato"?"Stato":AREAS[a]}</h2>${list.map(([k,l,t,st])=>{
+    if (t==="bool"||t==="neg") return `<div class="row"><span>${l}</span><button class="tog ${t==="neg"?"neg":""} ${state[k]?"on":""}" data-k="${k}"></button></div>`;
+    if (t==="rate") return `<div class="row"><span style="font-size:15px">${l}</span><div class="dots" data-k="${k}">${[1,2,3,4,5].map(n=>`<button class="${state[k]===n?"sel":""}" data-n="${n}">${n}</button>`).join("")}</div></div>`;
+    return `<div class="row"><span>${l}</span><div class="step"><button data-k="${k}" data-d="-${st}">−</button><span id="n-${k}">${state[k]}</span><button data-k="${k}" data-d="${st}">+</button></div></div>`;
+  }).join("")}</div>`).join("");
+  $("note").value = state.note || "";
 }
-document.addEventListener("click", e=>{
-  const b=e.target.closest("button"); if(!b) return;
-  if (b.classList.contains("tog")){ const k=b.dataset.k; state[k]=!state[k]; b.classList.toggle("on",state[k]); }
-  else if (b.dataset.d){ const k=b.dataset.k; state[k]=Math.max(0,Math.round((Number(state[k])+Number(b.dataset.d))*10)/10); $("n-"+k).textContent=state[k]; }
-  else if (b.dataset.n){ const k=b.parentElement.dataset.k, n=Number(b.dataset.n); state[k]= state[k]===n?null:n; renderForm(); }
-  else if (b.dataset.v){ show(b.dataset.v); }
-});
-
 async function loadDay(){
-  state = blank();
+  state = blank(); $("save-err").textContent=""; dirtyDay=false;
   const { data, error } = await sb.from("daily_checkins").select("*").eq("day",$("day").value).maybeSingle();
-  if (error) { $("save-err").textContent = "Errore lettura: "+error.message; }
-  if (data) ALLKEYS.forEach(k=>{ if (data[k]!==undefined && data[k]!==null) state[k]= k==="project_hours"?Number(data[k]):data[k]; });
+  if (error) $("save-err").textContent = "Errore lettura: "+error.message;
+  if (data) KEYS.forEach(k=>{ if (data[k]!==undefined && data[k]!==null) state[k] = k==="project_hours" ? Number(data[k]) : data[k]; });
   renderForm();
 }
-$("day").addEventListener("change", loadDay);
-
 $("b-save").onclick = async ()=>{
   $("save-err").textContent="";
-  const { data:{ user } } = await sb.auth.getUser();
-  const row = { user_id:user.id, day:$("day").value, updated_at:new Date().toISOString() };
-  ALLKEYS.forEach(k=>row[k]=state[k]); row.note=$("note").value.trim()||null;
+  const row = { user_id:UID, day:$("day").value, updated_at:new Date().toISOString() };
+  KEYS.forEach(k=>row[k]=state[k]); row.note=$("note").value.trim()||null;
   const { error } = await sb.from("daily_checkins").upsert(row,{ onConflict:"user_id,day" });
   if (error) { $("save-err").textContent="Errore salvataggio: "+error.message; return; }
-  const t=$("toast"); t.style.display="block"; setTimeout(()=>t.style.display="none",1400);
+  toast(); loadFocus();
 };
 
-/* ---------- settimana ---------- */
+/* ================= TARGET SETTIMANALI ================= */
 const TARGETS = [
-  ["Palestra", r=>r.gym?1:0, 3, "volte"],
-  ["Tennis", r=>r.tennis?1:0, 2, "volte"],
-  ["Stretching (giorni ≥10 min)", r=>r.stretching_min>=10?1:0, 5, "giorni"],
-  ["Meditazione (giorni ≥5 min)", r=>r.meditation_min>=5?1:0, 5, "giorni"],
-  ["Spagnolo (giorni ≥15 min)", r=>r.spanish_min>=15?1:0, 5, "giorni"],
-  ["Pronuncia inglese", r=>r.english_pron?1:0, 3, "sessioni"],
-  ["Priorità del giorno", r=>r.priority_done?1:0, 5, "giorni"],
-  ["Azioni casa", r=>r.house_action?1:0, 2, "azioni"],
-  ["Progetto parallelo", r=>Number(r.project_hours)||0, 3, "ore"],
-  ["Contatti senior", r=>r.senior_contact?1:0, 1, "contatti"]
+  {k:"wake",  l:"Sveglia 7:30",               a:"corpo", ty:"days", t:5, f:r=>r.wake_730},
+  {k:"gym",   l:"Palestra",                   a:"corpo", ty:"days", t:3, f:r=>r.gym},
+  {k:"tennis",l:"Tennis",                     a:"corpo", ty:"days", t:2, f:r=>r.tennis},
+  {k:"stretch",l:"Stretching ≥10 min",        a:"corpo", ty:"days", t:6, f:r=>N(r.stretching_min)>=10},
+  {k:"food",  l:"Mangiato equilibrato",       a:"corpo", ty:"days", t:5, f:r=>r.healthy_food},
+  {k:"alc",   l:"Drink alcolici (max)",       a:"corpo", ty:"max",  t:4, f:r=>N(r.alcohol_drinks)},
+  {k:"med",   l:"Meditazione ≥10 min",        a:"mente", ty:"days", t:6, f:r=>N(r.meditation_min)>=10},
+  {k:"read",  l:"Lettura ≥10 min",            a:"mente", ty:"days", t:5, f:r=>N(r.reading_min)>=10},
+  {k:"jour",  l:"Journaling",                 a:"mente", ty:"days", t:3, f:r=>r.journaling},
+  {k:"selfi", l:"Auto-insulti (max)",         a:"mente", ty:"max",  t:0, f:r=>r.self_insult?1:0},
+  {k:"pres",  l:"Calma e presenza (media)",   a:"comunicazione", ty:"avg", t:4, f:r=>r.presence},
+  {k:"imp",   l:"Reazioni impulsive (max)",   a:"comunicazione", ty:"max", t:0, f:r=>N(r.impulsive)},
+  {k:"iro",   l:"Ironia come difesa (max)",   a:"comunicazione", ty:"max", t:1, f:r=>N(r.irony_defense)},
+  {k:"es",    l:"Spagnolo ≥20 min",           a:"lingue", ty:"days", t:5, f:r=>N(r.spanish_min)>=20},
+  {k:"fr",    l:"Francese ≥20 min",           a:"lingue", ty:"days", t:3, f:r=>N(r.french_min)>=20},
+  {k:"en",    l:"Pronuncia inglese",          a:"lingue", ty:"days", t:3, f:r=>r.english_pron},
+  {k:"prio",  l:"Priorità del giorno",        a:"carriera", ty:"days", t:5, f:r=>r.priority_done},
+  {k:"focus", l:"Focus 90 min",               a:"carriera", ty:"days", t:5, f:r=>r.focus_90},
+  {k:"proj",  l:"Ore attività parallela",     a:"carriera", ty:"sum",  t:3, f:r=>N(r.project_hours)},
+  {k:"sen",   l:"Contatti senior (mese)",     a:"carriera", ty:"month",t:2, f:r=>r.senior_contact?1:0},
+  {k:"house", l:"Azioni concrete casa",       a:"finanze", ty:"days", t:2, f:r=>r.house_action},
+  {k:"conv",  l:"Persone nuove conosciute",   a:"sociale", ty:"sum",  t:5, f:r=>N(r.new_conversations)},
+  {k:"chase", l:"Inseguire (max)",            a:"sociale", ty:"max",  t:0, f:r=>r.chased?1:0},
+  {k:"dress", l:"Curato e vestito bene",      a:"sociale", ty:"days", t:5, f:r=>r.dressed_well},
+  {k:"hobby", l:"Hobby creativo",             a:"sociale", ty:"days", t:1, f:r=>r.creative_hobby}
 ];
+function evalT(T, rows, scale=1){
+  if (T.ty==="avg"){ const v=rows.map(T.f).filter(x=>x!=null); if(!v.length) return {v:null,p:null};
+    const m=v.reduce((a,b)=>a+b,0)/v.length; return {v:Math.round(m*10)/10, p:Math.min(1,m/T.t)}; }
+  const v = Math.round(rows.reduce((a,r)=>a+(T.ty==="days"?(T.f(r)?1:0):N(T.f(r))),0)*10)/10;
+  if (T.ty==="max") return {v, p: v<=T.t*Math.max(1,scale) ? 1 : Math.max(0, 1-(v-T.t*Math.max(1,scale))/(T.t+3))};
+  const goal = T.t*scale; return {v, p: goal<=0 ? 1 : Math.min(1, v/goal)};
+}
+const colOf = p => p==null ? "var(--line)" : p>=.9 ? "var(--ok)" : p>=.5 ? "var(--warn)" : "var(--bad)";
+function weekScore(rows, scale){ const ps=TARGETS.filter(T=>T.ty!=="month").map(T=>evalT(T,rows,scale).p).filter(p=>p!=null); return ps.length?ps.reduce((a,b)=>a+b,0)/ps.length:null; }
+
+/* ================= DATI ================= */
+async function fetchRows(fromISO, toISO){
+  let q = sb.from("daily_checkins").select("*").order("day");
+  if (fromISO) q=q.gte("day",fromISO); if (toISO) q=q.lte("day",toISO);
+  const { data, error } = await q; if (error) throw error; return data||[];
+}
+async function fetchGoals(){ const { data, error } = await sb.from("goals").select("*").order("sort").order("id"); if (error) throw error; return data||[]; }
+async function fetchItems(){ const { data, error } = await sb.from("routine_items").select("*").order("routine").order("sort").order("id"); if (error) throw error; return data||[]; }
+async function fetchDone(fromISO, toISO){ let q=sb.from("routine_done").select("*").gte("day",fromISO); if(toISO) q=q.lte("day",toISO);
+  const { data, error } = await q; if (error) throw error; return data||[]; }
+async function fetchBody(){ const { data, error } = await sb.from("body_measurements").select("*").order("day"); if (error) throw error; return data||[]; }
+const goalProgress = g => (g.steps && g.steps.length) ? Math.round(g.steps.filter(s=>s.d).length/g.steps.length*100) : g.progress;
+
+/* ================= IMPOSTAZIONI (target corpo) ================= */
+const DEF_SET = { height:174, w_min:69, w_max:75, waist_aes:79, waist_health:94, chest_min:105, chest_max:107, arm:36, sh_min:110, sh_max:113, thigh:null, bf:null };
+let SET = {...DEF_SET};
+async function loadSettings(){ const { data } = await sb.from("user_settings").select("data").maybeSingle(); SET = {...DEF_SET, ...(data?.data||{})}; }
+async function saveSettings(){ const { error } = await sb.from("user_settings").upsert({user_id:UID, data:SET, updated_at:new Date().toISOString()},{onConflict:"user_id"}); if(error) alert(error.message); }
+
+/* ================= OGGI: focus ================= */
+async function loadFocus(){
+  const mon=mondayOf(new Date()), today=new Date(), tISO=localISO(today);
+  const elapsed = dayOfWeek();
+  try{
+    const [rows, rev, items, done, body] = await Promise.all([ fetchRows(localISO(mon), localISO(addDays(mon,6))),
+      sb.from("weekly_reviews").select("*").eq("week_start", localISO(addDays(mon,-7))).maybeSingle(),
+      fetchItems(), fetchDone(tISO, tISO), fetchBody() ]);
+    const r = rev.data, doneIds=new Set(done.map(d=>d.item_id));
+    let h = `<h2>Focus della settimana</h2>`;
+    const pr=[r?.p1,r?.p2,r?.p3].filter(Boolean);
+    h += pr.length ? pr.map((p,i)=>`<div class="prio"><b>${i+1}.</b> ${esc(p)}</div>`).join("")
+                   : `<div class="mut">Nessuna priorità impostata. Falle nella review di domenica (tab Settimana).</div>`;
+    // routine di oggi
+    const rt = ["mattina","sera"].map(k=>{ const its=items.filter(i=>i.routine===k&&i.active); return {k, n:its.length, d:its.filter(i=>doneIds.has(i.id)).length}; });
+    h += `<h3>Routine di oggi</h3><div class="grid2">${rt.map(x=>`<button class="tile" data-v="routine" data-rt="${x.k}" style="text-align:left;color:var(--txt)">
+      <div class="l">${x.k==="mattina"?"☀︎ Mattina":"☾ Sera"}</div><div class="n">${x.d}/${x.n}</div><div class="bar"><i style="width:${x.n?x.d/x.n*100:0}%;background:${x.n&&x.d===x.n?"var(--ok)":"var(--yel)"}"></i></div></button>`).join("")}</div>`;
+    // corpo
+    const last = body[body.length-1];
+    if (!last) h += `<div class="warn">Nessuna misura del corpo: inseriscila nella tab Corpo.</div>`;
+    else { const days=Math.round((today-new Date(last.day+"T12:00"))/864e5); if (days>=7) h += `<div class="warn">Ultima misura del corpo ${days} giorni fa. Pesati e misurati oggi (tab Corpo).</div>`; }
+    // ritardi
+    const behind = TARGETS.filter(T=>["days","sum"].includes(T.ty)).map(T=>{ const e=evalT(T,rows,elapsed/7); const exp=T.t*elapsed/7;
+      return {T, v:e.v, exp, gap:(exp-e.v)/T.t}; }).filter(x=>x.exp-x.v>=1).sort((a,b)=>b.gap-a.gap).slice(0,3);
+    const over = TARGETS.filter(T=>T.ty==="max").map(T=>({T,v:evalT(T,rows).v})).filter(x=>x.v>x.T.t);
+    if (behind.length||over.length){ h += `<h3>Sei indietro su</h3>`;
+      h += behind.map(x=>`<div class="warn">${x.T.l}: <b>${x.v}</b> su ${x.T.t} (a oggi dovresti essere a ${Math.round(x.exp*10)/10})</div>`).join("");
+      h += over.map(x=>`<div class="warn" style="border-left-color:var(--bad)">${x.T.l}: <b>${x.v}</b>, limite ${x.T.t}</div>`).join("");
+    } else if (rows.length) h += `<div class="warn good">Sei in linea con tutti i target della settimana.</div>`;
+    $("t-focus").innerHTML = h;
+  }catch(e){ $("t-focus").innerHTML = `<div class="err">${esc(e.message)} — hai eseguito schema_v2.sql e schema_v3.sql?</div>`; }
+}
+
+/* ================= ROUTINE ================= */
+const RT_NAMES = {mattina:"☀︎ Mattina", sera:"☾ Sera", principi:"✦ Principi"};
+const LINKS = {"":"Nessuno","wake_730":"Sveglia 7:30","stretching_min:10":"Stretching 10 min","meditation_min:10":"Meditazione 10 min","priority_done":"One Big Thing fatto",
+  "reading_min:10":"Lettura 10 min","journaling":"Journaling","spanish_min:20":"Spagnolo 20 min","english_pron":"Pronuncia inglese","focus_90":"Focus 90 min","healthy_food":"Mangiato equilibrato","dressed_well":"Curato e vestito bene"};
+let rtSel = "mattina", rItems=[], rDone=new Set(), rOpen=null;
+function rtDefault(){ const h=new Date().getHours(); return h>=17 ? "sera" : "mattina"; }
+async function loadRoutine(){
+  const tISO=localISO(new Date());
+  try{ [rItems] = await Promise.all([fetchItems()]); rDone = new Set((await fetchDone(tISO,tISO)).map(d=>d.item_id)); }
+  catch(e){ $("r-body").innerHTML=`<div class="card err">${esc(e.message)} — hai eseguito schema_v3.sql?</div>`; return; }
+  $("r-chips").innerHTML = Object.entries(RT_NAMES).map(([k,l])=>`<button data-rs="${k}" class="${rtSel===k?"sel":""}">${l}</button>`).join("");
+  const its = rItems.filter(i=>i.routine===rtSel && i.active);
+  if (rtSel==="principi"){
+    $("r-body").innerHTML = `<div class="mut" style="margin-bottom:8px">Le regole da rileggere prima di una conversazione importante. Tocca per aprire.</div>`
+      + its.map(i=>`<div class="ritem" data-ro="${i.id}"><span class="e">${esc(i.emoji||"•")}</span><div class="tt">${esc(i.title)}</div><button class="ibtn" data-re="${i.id}">✎</button></div>${rOpen===i.id&&i.context?`<div class="ctx">${esc(i.context)}</div>`:""}`).join("")
+      + `<button class="btn sec" data-radd="principi">+ Aggiungi principio</button>`;
+    return;
+  }
+  const n=its.length, d=its.filter(i=>rDone.has(i.id)).length, left=its.filter(i=>!rDone.has(i.id)).reduce((a,i)=>a+N(i.minutes),0);
+  const tot=its.reduce((a,i)=>a+N(i.minutes),0);
+  const end=new Date(Date.now()+left*60000);
+  $("r-body").innerHTML = `<div class="card"><div style="display:flex;justify-content:space-between;align-items:end"><div><div class="big">${d}/${n}</div>
+      <div class="mut">${tot} min totali · ${left} min rimasti${left?` · finisci alle ${end.toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})}`:""}</div></div>
+      <div class="mut">${n&&d===n?"✅ completata":""}</div></div><div class="bar"><i style="width:${n?d/n*100:0}%;background:${n&&d===n?"var(--ok)":"var(--yel)"}"></i></div>
+      ${left?`<button class="btn yel" id="b-guide">▶ Avvia modalità guidata</button>`:""}</div>`
+    + its.map((i,ix)=>{ const on=rDone.has(i.id);
+      return `<div class="ritem ${on?"done":""}"><button class="chk ${on?"on":""}" data-rc="${i.id}">${on?"✓":""}</button><span class="e">${esc(i.emoji||"•")}</span>
+        <div class="tt" data-ro="${i.id}">${esc(i.title)}<small>${i.minutes} min${i.link?" · ↻ "+(LINKS[i.link]||i.link):""}${i.context?" · tocca per i dettagli":""}</small></div>
+        <button class="ibtn" data-re="${i.id}">✎</button></div>${rOpen===i.id&&i.context?`<div class="ctx">${esc(i.context)}</div>`:""}`; }).join("")
+    + `<button class="btn sec" data-radd="${rtSel}">+ Aggiungi voce</button>`
+    + `<div class="mut" style="margin-top:8px">↻ = quando la spunti, compila da sola la voce corrispondente del check-in.</div>`;
+  if ($("b-guide")) $("b-guide").onclick = startGuide;
+}
+async function applyLink(link, day){
+  if (!link) return;
+  const [k,v] = link.split(":");
+  const { data } = await sb.from("daily_checkins").select(k).eq("day",day).maybeSingle();
+  const val = v ? Math.max(N(data?.[k]), Number(v)) : true;
+  const { error } = await sb.from("daily_checkins").upsert({user_id:UID, day, [k]:val, updated_at:new Date().toISOString()},{onConflict:"user_id,day"});
+  if (!error) dirtyDay = true;
+}
+async function toggleItem(id, forceOn){
+  const day=localISO(new Date()), it=rItems.find(i=>i.id===id), on = forceOn ?? !rDone.has(id);
+  if (on){ const { error } = await sb.from("routine_done").upsert({user_id:UID, day, item_id:id},{onConflict:"user_id,day,item_id"}); if(error) return alert(error.message);
+    rDone.add(id); await applyLink(it?.link, day); }
+  else { const { error } = await sb.from("routine_done").delete().eq("day",day).eq("item_id",id); if(error) return alert(error.message); rDone.delete(id); }
+}
+function itemModal(it, routine){
+  it = it || {routine, emoji:"", title:"", minutes:1, context:"", link:"", sort:(rItems.filter(i=>i.routine===routine).reduce((a,i)=>Math.max(a,i.sort),0)+1)};
+  const opt=(o,v)=>Object.entries(o).map(([k,l])=>`<option value="${k}" ${k===(v||"")?"selected":""}>${l}</option>`).join("");
+  $("m-body").innerHTML = `<h2>${it.id?"Modifica voce":"Nuova voce"}</h2>
+    <div class="grid2"><div><label class="f">Emoji</label><input id="i-emoji" value="${esc(it.emoji)}"></div><div><label class="f">Minuti</label><input id="i-min" type="number" min="0" value="${it.minutes}"></div></div>
+    <label class="f">Titolo</label><input id="i-title" value="${esc(it.title)}">
+    <div class="grid2"><div><label class="f">Routine</label><select id="i-rt">${opt({mattina:"Mattina",sera:"Sera",principi:"Principi"},it.routine)}</select></div>
+    <div><label class="f">Ordine</label><input id="i-sort" type="number" value="${it.sort}"></div></div>
+    <label class="f">Collega al check-in</label><select id="i-link">${opt(LINKS,it.link)}</select>
+    <label class="f">Dettagli / istruzioni</label><textarea id="i-ctx" rows="6">${esc(it.context)}</textarea>
+    <button class="btn" id="i-save">Salva</button><button class="btn sec" id="i-cancel">Annulla</button>${it.id?`<button class="btn del" id="i-del">Elimina</button>`:""}`;
+  $("modal").classList.remove("hidden");
+  $("i-cancel").onclick=()=>$("modal").classList.add("hidden");
+  $("i-save").onclick=async()=>{
+    const row={ routine:$("i-rt").value, emoji:$("i-emoji").value.trim()||null, title:$("i-title").value.trim()||"Senza titolo", minutes:N($("i-min").value),
+      sort:N($("i-sort").value), link:$("i-link").value||null, context:$("i-ctx").value.trim()||null };
+    const { error } = it.id ? await sb.from("routine_items").update(row).eq("id",it.id) : await sb.from("routine_items").insert({...row, user_id:UID});
+    if (error) return alert(error.message); $("modal").classList.add("hidden"); toast(); loadRoutine();
+  };
+  if (it.id) $("i-del").onclick=async()=>{ if(!confirm("Eliminare questa voce?")) return; await sb.from("routine_items").delete().eq("id",it.id); $("modal").classList.add("hidden"); loadRoutine(); };
+}
+/* modalità guidata */
+let gq=[], gi=0, gTimer=null, gLeft=0;
+function startGuide(){ gq = rItems.filter(i=>i.routine===rtSel && i.active && !rDone.has(i.id)); gi=0; $("guide").classList.remove("hidden"); renderGuide(); }
+function renderGuide(){
+  clearInterval(gTimer);
+  if (gi>=gq.length){ $("guide").innerHTML=`<div class="gx"><div class="ge">🏁</div><div class="gt">Routine completata</div><div class="mut">Ottimo. Una cosa alla volta.</div></div><button class="btn" id="g-close">Chiudi</button>`;
+    $("g-close").onclick=()=>{ $("guide").classList.add("hidden"); loadRoutine(); }; return; }
+  const it=gq[gi]; gLeft=N(it.minutes)*60;
+  const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+  $("guide").innerHTML = `<div style="display:flex;justify-content:space-between"><span class="mut">${gi+1} di ${gq.length}</span><button class="ibtn" id="g-x">Esci</button></div>
+    <div class="bar"><i style="width:${gi/gq.length*100}%;background:var(--yel)"></i></div>
+    <div class="gx"><div class="ge">${esc(it.emoji||"•")}</div><div class="gt">${esc(it.title)}</div>
+      ${gLeft>60?`<div class="timer" id="g-t">${fmt(gLeft)}</div>`:""}
+      ${it.context?`<div class="ctx" style="text-align:left;margin-top:12px">${esc(it.context)}</div>`:""}</div>
+    <button class="btn" id="g-ok" style="background:var(--ok)">✓ Fatto</button><button class="btn sec" id="g-skip">Salta</button>`;
+  if (gLeft>60) gTimer=setInterval(()=>{ gLeft=Math.max(0,gLeft-1); const t=$("g-t"); if(t){ t.textContent=fmt(gLeft); if(!gLeft){ t.style.color="var(--ok)"; navigator.vibrate&&navigator.vibrate(300); clearInterval(gTimer);} } },1000);
+  $("g-x").onclick=()=>{ clearInterval(gTimer); $("guide").classList.add("hidden"); loadRoutine(); };
+  $("g-ok").onclick=async()=>{ await toggleItem(it.id,true); gi++; renderGuide(); };
+  $("g-skip").onclick=()=>{ gi++; renderGuide(); };
+}
+
+/* ================= CORPO ================= */
+const BM = [["weight","Peso","kg"],["waist","Girovita","cm"],["chest","Petto","cm"],["arm","Braccio","cm"],["shoulders","Spalle","cm"],["thigh","Coscia","cm"],["body_fat","Massa grassa","%"]];
+let bodyRows=[];
+function bodyTargets(){ return {
+  weight:{lo:SET.w_min, hi:SET.w_max, dir:-1, label:`${SET.w_min}–${SET.w_max} kg`},
+  waist:{hi:SET.waist_aes, dir:-1, label:`< ${SET.waist_aes} cm (estetico) · < ${SET.waist_health} (salute)`},
+  chest:{lo:SET.chest_min, hi:SET.chest_max, dir:1, label:`${SET.chest_min}–${SET.chest_max} cm`},
+  arm:{lo:SET.arm, dir:1, label:`${SET.arm} cm`},
+  shoulders:{lo:SET.sh_min, hi:SET.sh_max, dir:1, label:`${SET.sh_min}–${SET.sh_max} cm`},
+  thigh: SET.thigh?{lo:SET.thigh, dir:1, label:`${SET.thigh} cm`}:null,
+  body_fat: SET.bf?{hi:SET.bf, dir:-1, label:`< ${SET.bf}%`}:null }; }
+function toTarget(key){ // progresso dalla prima misura al target
+  const T=bodyTargets()[key]; if(!T) return null;
+  const vals=bodyRows.filter(r=>r[key]!=null); if(!vals.length) return null;
+  const start=N(vals[0][key]), cur=N(vals[vals.length-1][key]);
+  const goal = T.dir<0 ? T.hi : T.lo;
+  const reached = T.dir<0 ? cur<=goal : cur>=goal;
+  if (reached) return {start,cur,goal,p:1};
+  const span = (goal-start)*T.dir; const p = span<=0 ? 0 : Math.max(0,Math.min(1,(cur-start)*T.dir/span));
+  return {start,cur,goal,p, left:Math.round(Math.abs(goal-cur)*10)/10};
+}
+async function loadBody(){
+  try{ [bodyRows] = await Promise.all([fetchBody(), loadSettings()]); }catch(e){ $("b-body").innerHTML=`<div class="card err">${esc(e.message)} — hai eseguito schema_v3.sql?</div>`; return; }
+  const last=bodyRows[bodyRows.length-1], prev=bodyRows[bodyRows.length-2], first=bodyRows[0];
+  const hM=SET.height/100;
+  let h = `<button class="btn yel" id="b-addm" style="margin:0 0 12px">+ Nuova misurazione</button>`;
+  if (!last){ $("b-body").innerHTML = h + `<div class="card"><h2>Inizia da qui</h2><div class="mut">Inserisci le misure del tuo Excel (anche quelle passate, cambiando la data). Da quel momento vedi grafici, tendenze e distanza dagli obiettivi.</div></div>`;
+    $("b-addm").onclick=()=>measureModal(null); return; }
+  const days=Math.round((new Date()-new Date(last.day+"T12:00"))/864e5);
+  if (days>=7) h += `<div class="warn">Ultima misura ${days} giorni fa. Obiettivo: 1 misura a settimana, stesso giorno, al mattino a digiuno.</div>`;
+  const delta=(k,ref)=>{ if(!ref||last[k]==null||ref[k]==null) return ""; const d=Math.round((N(last[k])-N(ref[k]))*10)/10; return d===0?"=":(d>0?"+":"")+d; };
+  const T=bodyTargets();
+  const dcol=(k,d)=>{ if(!d||d==="=") return "var(--mut)"; const n=Number(d); const dir=T[k]?.dir??-1; return n*dir>0?"var(--ok)":"var(--bad)"; };
+  const bmi = last.weight ? N(last.weight)/(hM*hM) : null, whr = last.waist ? N(last.waist)/SET.height : null;
+  const tile=(l,v,u,sub,col)=>`<div class="tile"><div class="l">${l}</div><div class="n" style="color:${col||"var(--txt)"}">${v??"–"}<span style="font-size:13px;font-weight:600"> ${v!=null?u:""}</span></div><div class="d">${sub||""}</div></div>`;
+  h += `<div class="card"><div class="mut" style="margin-bottom:8px">Ultima misura ${fmtD(last.day)} · ${bodyRows.length} misurazioni · altezza ${SET.height} cm</div><div class="grid2">
+    ${tile("Peso",last.weight,"kg",`<span style="color:${dcol("weight",delta("weight",prev))}">${delta("weight",prev)||""} vs prec.</span> · <span style="color:${dcol("weight",delta("weight",first))}">${delta("weight",first)} dall'inizio</span>`)}
+    ${tile("Girovita",last.waist,"cm",`<span style="color:${dcol("waist",delta("waist",prev))}">${delta("waist",prev)||""} vs prec.</span> · <span style="color:${dcol("waist",delta("waist",first))}">${delta("waist",first)} dall'inizio</span>`)}
+    ${tile("BMI",bmi?bmi.toFixed(1):null,"","obiettivo 22–25",bmi?(bmi<=25&&bmi>=20?"var(--ok)":bmi<=27?"var(--warn)":"var(--bad)"):null)}
+    ${tile("Girovita / altezza",whr?whr.toFixed(2):null,"","obiettivo < 0,50",whr?(whr<.5?"var(--ok)":whr<.55?"var(--warn)":"var(--bad)"):null)}
+  </div></div>`;
+  h += `<div class="card"><h2>Distanza dagli obiettivi</h2>` + BM.map(([k,l,u])=>{ const t=toTarget(k); if(!t) return "";
+    return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><span>${l} <span class="mut">${T[k].label}</span></span><b>${t.p>=1?"✓":`mancano ${t.left} ${u}`}</b></div>
+      <div class="bar"><i style="width:${t.p*100}%;background:${colOf(t.p)}"></i></div><div class="mut">da ${t.start} a ${t.cur} ${u} · obiettivo ${t.goal} ${u} · ${Math.round(t.p*100)}%</div></div>`; }).join("")
+    + `<button class="btn sec" id="b-tset">Modifica obiettivi corpo</button></div>`;
+  h += `<div class="card"><h2>Peso</h2><div class="chart"><canvas id="c-weight"></canvas></div></div>
+        <div class="card"><h2>Girovita</h2><div class="chart"><canvas id="c-waist"></canvas></div></div>
+        <div class="card"><h2>Circonferenze</h2><div class="chart"><canvas id="c-circ"></canvas></div></div>
+        <div class="card"><h2>Allenamenti a settimana</h2><div class="mut">Palestra + tennis + altro sport, dal check-in. Obiettivo: 5 (3 palestra + 2 tennis).</div><div class="chart"><canvas id="c-gym"></canvas></div></div>`;
+  h += `<div class="card"><h2>Storico</h2>` + [...bodyRows].reverse().map(r=>`<div class="row"><div><b>${fmtD(r.day)}/${r.day.slice(2,4)}</b><div class="mut">${BM.filter(([k])=>r[k]!=null).map(([k,l,u])=>`${l} ${r[k]}${u==="%"?"%":""}`).join(" · ")}</div></div><button class="ibtn" data-bm="${r.id}">✎</button></div>`).join("") + `</div>`;
+  $("b-body").innerHTML = h;
+  $("b-addm").onclick=()=>measureModal(null);
+  $("b-tset").onclick=targetsModal;
+  // grafici
+  const lab=bodyRows.map(r=>fmtD(r.day)), n=lab.length;
+  const series=(k,color)=>({label:BM.find(b=>b[0]===k)[1], data:bodyRows.map(r=>r[k]==null?null:N(r[k])), borderColor:color, backgroundColor:color, tension:.3, spanGaps:true, pointRadius:4});
+  drawChart("c-weight",{type:"line",data:{labels:lab,datasets:[series("weight","#38bdf8"),refLine("Max obiettivo",n,SET.w_max,"#22c55e"),refLine("Min obiettivo",n,SET.w_min,"#22c55e")]},options:{plugins:{legend:{display:false}}}});
+  drawChart("c-waist",{type:"line",data:{labels:lab,datasets:[series("waist","#f59e0b"),refLine("Salute < "+SET.waist_health,n,SET.waist_health,"#ef4444"),refLine("Estetico < "+SET.waist_aes,n,SET.waist_aes,"#22c55e")]},options:{plugins:{legend:{labels:{boxWidth:10}}}}});
+  drawChart("c-circ",{type:"line",data:{labels:lab,datasets:[series("chest","#a78bfa"),series("shoulders","#38bdf8"),series("arm","#22c55e"),series("thigh","#f472b6")].filter(d=>d.data.some(v=>v!=null))},options:{plugins:{legend:{labels:{boxWidth:10}}}}});
+  const mon=mondayOf(new Date()), from=addDays(mon,-49);
+  const rows=await fetchRows(localISO(from),null);
+  const wk=[...Array(8)].map((_,i)=>{ const s=addDays(from,7*i), e=addDays(s,6); const rr=rows.filter(r=>r.day>=localISO(s)&&r.day<=localISO(e));
+    return {l:fmtD(localISO(s)), g:rr.filter(r=>r.gym).length, t:rr.filter(r=>r.tennis).length, o:rr.filter(r=>r.other_sport).length}; });
+  drawChart("c-gym",{type:"bar",data:{labels:wk.map(w=>w.l),datasets:[{label:"Palestra",data:wk.map(w=>w.g),backgroundColor:"#38bdf8"},{label:"Tennis",data:wk.map(w=>w.t),backgroundColor:"#22c55e"},{label:"Altro",data:wk.map(w=>w.o),backgroundColor:"#a78bfa"},
+    {type:"line",label:"Obiettivo",data:Array(8).fill(5),borderColor:"#facc15",borderDash:[5,5],pointRadius:0}]},options:{scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,suggestedMax:6}},plugins:{legend:{labels:{boxWidth:10}}}}});
+}
+function measureModal(r){
+  const last=bodyRows[bodyRows.length-1]||{};
+  r = r || {day:localISO(new Date())};
+  $("m-body").innerHTML = `<h2>${r.id?"Modifica misurazione":"Nuova misurazione"}</h2><div class="mut">Al mattino, a digiuno, metro all'altezza dell'ombelico per il girovita. Lascia vuoto ciò che non misuri. In grigio il valore precedente.</div>
+    <label class="f">Data</label><input id="bm-day" type="date" value="${r.day}">
+    <div class="grid2">${BM.map(([k,l,u])=>`<div><label class="f">${l} (${u})</label><input id="bm-${k}" type="number" inputmode="decimal" step="0.1" value="${r[k]??""}" placeholder="${last[k]??""}"></div>`).join("")}</div>
+    <label class="f">Nota</label><input id="bm-note" value="${esc(r.note)}">
+    <button class="btn" id="bm-save">Salva</button><button class="btn sec" id="bm-cancel">Annulla</button>${r.id?`<button class="btn del" id="bm-del">Elimina</button>`:""}`;
+  $("modal").classList.remove("hidden");
+  $("bm-cancel").onclick=()=>$("modal").classList.add("hidden");
+  $("bm-save").onclick=async()=>{
+    const row={user_id:UID, day:$("bm-day").value, note:$("bm-note").value.trim()||null};
+    BM.forEach(([k])=>{ const v=$("bm-"+k).value.replace(",","."); row[k]= v===""?null:Number(v); });
+    if (BM.every(([k])=>row[k]==null)) return alert("Inserisci almeno una misura.");
+    const q = r.id ? sb.from("body_measurements").update(row).eq("id",r.id) : sb.from("body_measurements").upsert(row,{onConflict:"user_id,day"});
+    const { error } = await q; if (error) return alert(error.message);
+    $("modal").classList.add("hidden"); toast(); loadBody();
+  };
+  if (r.id) $("bm-del").onclick=async()=>{ if(!confirm("Eliminare questa misurazione?")) return; await sb.from("body_measurements").delete().eq("id",r.id); $("modal").classList.add("hidden"); loadBody(); };
+}
+function targetsModal(){
+  const F=[["height","Altezza (cm)"],["w_min","Peso minimo (kg)"],["w_max","Peso massimo (kg)"],["waist_aes","Girovita estetico (cm)"],["waist_health","Girovita salute (cm)"],
+    ["chest_min","Petto min (cm)"],["chest_max","Petto max (cm)"],["arm","Braccio (cm)"],["sh_min","Spalle min (cm)"],["sh_max","Spalle max (cm)"],["thigh","Coscia (cm, opzionale)"],["bf","Massa grassa max (%, opzionale)"]];
+  $("m-body").innerHTML = `<h2>Obiettivi corpo</h2><div class="mut">Presi dal tuo foglio Riferimenti (proporzioni Steve Reeves e indicatori di salute).</div>
+    <div class="grid2">${F.map(([k,l])=>`<div><label class="f">${l}</label><input id="ts-${k}" type="number" inputmode="decimal" step="0.1" value="${SET[k]??""}"></div>`).join("")}</div>
+    <button class="btn" id="ts-save">Salva</button><button class="btn sec" id="ts-cancel">Annulla</button>`;
+  $("modal").classList.remove("hidden");
+  $("ts-cancel").onclick=()=>$("modal").classList.add("hidden");
+  $("ts-save").onclick=async()=>{ F.forEach(([k])=>{ const v=$("ts-"+k).value; SET[k]= v===""?null:Number(v); }); await saveSettings(); $("modal").classList.add("hidden"); toast(); loadBody(); };
+}
+
+/* ================= SETTIMANA ================= */
+const REVIEW_TXT = [["best","Miglior risultato della settimana"],["weak","Dove ho perso consistenza"],["stalled","Obiettivo di cui parlo ma che non avanza"],
+  ["evidence","Prova concreta di progresso"],["obstacle","Ostacolo principale e correzione"],["p1","Priorità 1 prossima settimana"],["p2","Priorità 2"],["p3","Priorità 3"]];
+const REVIEW_BOOL = [["spese_ok","Spese controllate"],["invest_ok","Investimento mensile fatto / automatico"],["sunday_ok","Domenica sacra rispettata"],["nophone_ok","1 ora senza telefono"]];
+let rev = {};
 async function loadWeek(){
-  const now=new Date(), dow=(now.getDay()+6)%7, mon=new Date(now); mon.setDate(now.getDate()-dow);
-  const sun=new Date(mon); sun.setDate(mon.getDate()+6);
-  $("w-range").textContent=`Settimana ${localISO(mon)} → ${localISO(sun)}`;
-  const { data=[], error } = await sb.from("daily_checkins").select("*").gte("day",localISO(mon)).lte("day",localISO(sun));
-  if (error){ $("w-list").textContent=error.message; return; }
-  let tot=0;
-  const html = TARGETS.map(([l,f,t,u])=>{
-    const v=Math.round(data.reduce((a,r)=>a+f(r),0)*10)/10, p=Math.min(1,v/t); tot+=p;
-    const col = p>=1?"var(--ok)":p>=.5?"var(--warn)":"var(--bad)";
-    return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><span>${l}</span><b>${v} / ${t} ${u}</b></div><div class="bar"><i style="width:${p*100}%;background:${col}"></i></div></div>`;
-  }).join("");
-  const imp=data.reduce((a,r)=>a+(r.impulsive||0),0);
-  $("w-list").innerHTML = html + `<div class="row"><span>Reazioni impulsive</span><b style="color:${imp?"var(--warn)":"var(--ok)"}">${imp}</b></div><div class="row"><span>Giorni registrati</span><b>${data.length} / 7</b></div>`;
-  $("w-score").textContent = Math.round(tot/TARGETS.length*100)+"%";
+  const mon=mondayOf(new Date()), sun=addDays(mon,6), today=new Date();
+  const elapsed=dayOfWeek();
+  $("w-range").textContent=`Settimana ${fmtD(localISO(mon))} → ${fmtD(localISO(sun))} · giorno ${elapsed}/7`;
+  try{
+    const monthStart=new Date(today.getFullYear(),today.getMonth(),1,12);
+    const [rows, mrows] = await Promise.all([fetchRows(localISO(mon),localISO(sun)), fetchRows(localISO(monthStart),null)]);
+    let tot=0,n=0;
+    const html = Object.keys(AREAS).map(a=>{
+      const list=TARGETS.filter(T=>T.a===a); if(!list.length) return "";
+      return `<div class="card"><h2>${AREAS[a]}</h2>${list.map(T=>{
+        const src = T.ty==="month" ? mrows : rows;
+        const pace = T.ty==="month" ? today.getDate()/new Date(today.getFullYear(),today.getMonth()+1,0).getDate() : elapsed/7;
+        const e=evalT(T,src,T.ty==="max"?1:pace), full=evalT(T,src,1);
+        if (e.p!=null){ tot+=e.p; n++; }
+        const unit = T.ty==="max" ? `limite ${T.t}` : T.ty==="avg" ? `obiettivo ≥${T.t}` : `/ ${T.t}`;
+        return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><span>${T.l}</span><b>${e.v==null?"–":e.v} ${unit}</b></div>
+          <div class="bar"><i style="width:${(T.ty==="max"||T.ty==="avg"?(e.p||0):(full.p||0))*100}%;background:${colOf(e.p)}"></i></div></div>`;
+      }).join("")}</div>`;
+    }).join("");
+    $("w-list").innerHTML = html + `<div class="card"><div class="row"><span>Giorni registrati</span><b>${rows.length} / ${elapsed}</b></div></div>`;
+    $("w-score").textContent = n ? Math.round(tot/n*100)+"%" : "–";
+  }catch(e){ $("w-list").innerHTML=`<div class="card err">${esc(e.message)}</div>`; }
+  const { data } = await sb.from("weekly_reviews").select("*").eq("week_start",localISO(mon)).maybeSingle();
+  rev = data || {}; renderReview();
+}
+function renderReview(){
+  $("w-review").innerHTML = REVIEW_TXT.map(([k,l])=>`<label class="f">${l}</label>${k.startsWith("p")?`<input data-r="${k}" value="${esc(rev[k])}">`:`<textarea data-r="${k}" rows="2">${esc(rev[k])}</textarea>`}`).join("")
+   + `<h3>Check settimanali</h3>` + REVIEW_BOOL.map(([k,l])=>`<div class="row"><span>${l}</span><button class="tog ${rev[k]?"on":""}" data-rb="${k}"></button></div>`).join("")
+   + `<div class="row"><span>Libri finiti questa settimana</span><div class="step"><button data-rn="-1">−</button><span id="rv-books">${rev.books_finished||0}</span><button data-rn="1">+</button></div></div>`
+   + `<div class="row"><span>Voto alla settimana</span><div class="dots" id="rv-rate">${[1,2,3,4,5].map(n=>`<button class="${rev.rating===n?"sel":""}" data-rr="${n}">${n}</button>`).join("")}</div></div>`;
+}
+$("b-review").onclick = async ()=>{
+  $("rev-err").textContent="";
+  document.querySelectorAll("[data-r]").forEach(el=>rev[el.dataset.r]=el.value.trim()||null);
+  const row = { user_id:UID, week_start:localISO(mondayOf(new Date())), updated_at:new Date().toISOString() };
+  REVIEW_TXT.forEach(([k])=>row[k]=rev[k]??null); REVIEW_BOOL.forEach(([k])=>row[k]=!!rev[k]);
+  row.books_finished=rev.books_finished||0; row.rating=rev.rating||null;
+  const { error } = await sb.from("weekly_reviews").upsert(row,{onConflict:"user_id,week_start"});
+  if (error) $("rev-err").textContent=error.message; else toast("Review salvata ✓");
+};
+
+/* ================= OBIETTIVI ================= */
+let goals=[], gFilter="attivo", openGoal=null;
+async function loadGoals(){
+  try{ goals = await fetchGoals(); }catch(e){ $("g-list").innerHTML=`<div class="card err">${esc(e.message)}</div>`; return; }
+  const cnt = s => goals.filter(g=>g.status===s && g.kind!=="identita").length;
+  $("g-chips").innerHTML = [["attivo","Attivi"],["backlog","Backlog"],["raggiunto","Raggiunti"],["identita","Identità"]]
+    .map(([k,l])=>`<button data-gf="${k}" class="${gFilter===k?"sel":""}">${l}${k!=="identita"?` (${cnt(k)})`:""}</button>`).join("");
+  if (gFilter==="identita"){
+    const ids=goals.filter(g=>g.kind==="identita");
+    $("g-list").innerHTML = `<div class="card">${ids.map(g=>`<div class="goal"><div class="t"><b>${esc(g.title)}</b><button class="pill" data-ge="${g.id}">modifica</button></div><div class="mut" style="margin-top:4px;white-space:pre-line">${esc(g.notes||g.metric||"")}</div></div>`).join("")||'<div class="mut">Nessuna identità.</div>'}</div>`;
+    return;
+  }
+  const list = goals.filter(g=>g.status===gFilter && g.kind!=="identita");
+  $("g-list").innerHTML = Object.keys(AREAS).map(a=>{
+    const gs=list.filter(g=>g.area===a); if(!gs.length) return "";
+    return `<div class="card"><h2>${AREAS[a]}</h2>${gs.map(g=>{ const p=goalProgress(g), open=openGoal===g.id;
+      return `<div class="goal"><div class="t" data-go="${g.id}"><b>${esc(g.title)}</b><span class="pill">${KINDS[g.kind]||g.kind}</span></div>
+        <div class="bar"><i style="width:${p}%;background:${colOf(p/100)}"></i></div>
+        <div class="mut" style="margin-top:4px">${p}%${g.metric?" · "+esc(g.metric):""}${g.deadline?" · entro "+g.deadline:""}</div>
+        ${g.next_action?`<div style="font-size:14px;margin-top:4px">→ ${esc(g.next_action)}</div>`:""}
+        ${open?`<div class="steps">${(g.steps||[]).map((s,i)=>`<div><input type="checkbox" data-gs="${g.id}" data-i="${i}" ${s.d?"checked":""}><span>${esc(s.t)}</span></div>`).join("")}</div>
+          ${g.target?`<div class="mut" style="margin-top:6px">Target: ${esc(g.target)}</div>`:""}
+          ${g.notes?`<div class="mut" style="margin-top:4px;white-space:pre-line">${esc(g.notes)}</div>`:""}
+          <button class="btn sec" data-ge="${g.id}" style="padding:10px;margin-top:10px">Modifica</button>`:""}
+      </div>`; }).join("")}</div>`;
+  }).join("") || `<div class="card mut">Nessun obiettivo in questa lista.</div>`;
+}
+async function saveGoal(g){
+  const { error } = g.id ? await sb.from("goals").update({...g, updated_at:new Date().toISOString()}).eq("id",g.id) : await sb.from("goals").insert(g);
+  if (error) { alert(error.message); return false; } return true;
+}
+function goalModal(g){
+  g = g || {area:"corpo",kind:"risultato",status:"attivo",progress:0,steps:[]};
+  const stepsTxt=(g.steps||[]).map(s=>(s.d?"* ":"")+s.t).join("\n");
+  const opt=(o,v)=>Object.entries(o).map(([k,l])=>`<option value="${k}" ${k===v?"selected":""}>${l}</option>`).join("");
+  $("m-body").innerHTML = `<h2>${g.id?"Modifica obiettivo":"Nuovo obiettivo"}</h2>
+    <label class="f">Titolo</label><input id="m-title" value="${esc(g.title)}">
+    <div class="grid2"><div><label class="f">Area</label><select id="m-area">${opt({...AREAS,identita:"Identità"},g.area)}</select></div>
+    <div><label class="f">Tipo</label><select id="m-kind">${opt(KINDS,g.kind)}</select></div></div>
+    <div class="grid2"><div><label class="f">Stato</label><select id="m-status">${opt({attivo:"Attivo",backlog:"Backlog",raggiunto:"Raggiunto"},g.status)}</select></div>
+    <div><label class="f">Scadenza</label><input id="m-deadline" type="date" value="${g.deadline||""}"></div></div>
+    <label class="f">Come lo misuro</label><input id="m-metric" value="${esc(g.metric)}">
+    <label class="f">Target</label><input id="m-target" value="${esc(g.target)}">
+    <label class="f">Prossima azione concreta</label><input id="m-next" value="${esc(g.next_action)}">
+    <label class="f">Tappe (una per riga, * davanti a quelle fatte). Con le tappe il % si calcola da solo.</label><textarea id="m-steps" rows="5">${esc(stepsTxt)}</textarea>
+    <label class="f">Progresso manuale: <b id="m-pv">${g.progress||0}%</b> (solo senza tappe)</label><input id="m-prog" type="range" min="0" max="100" step="5" value="${g.progress||0}" style="padding:0">
+    <label class="f">Note</label><textarea id="m-notes" rows="3">${esc(g.notes)}</textarea>
+    <button class="btn" id="m-save">Salva</button><button class="btn sec" id="m-cancel">Annulla</button>${g.id?`<button class="btn del" id="m-del">Elimina</button>`:""}`;
+  $("modal").classList.remove("hidden");
+  $("m-prog").oninput=e=>$("m-pv").textContent=e.target.value+"%";
+  $("m-cancel").onclick=()=>$("modal").classList.add("hidden");
+  $("m-save").onclick=async()=>{
+    const steps=$("m-steps").value.split("\n").map(s=>s.trim()).filter(Boolean).map(s=>({t:s.replace(/^\*\s*/,""),d:s.startsWith("*")}));
+    const kind=$("m-kind").value;
+    const ng={ ...(g.id?{id:g.id}:{}), title:$("m-title").value.trim()||"Senza titolo", area:kind==="identita"?"identita":$("m-area").value, kind,
+      status:$("m-status").value, deadline:$("m-deadline").value||null, metric:$("m-metric").value.trim()||null, target:$("m-target").value.trim()||null,
+      next_action:$("m-next").value.trim()||null, steps, progress:steps.length?Math.round(steps.filter(s=>s.d).length/steps.length*100):Number($("m-prog").value),
+      notes:$("m-notes").value.trim()||null };
+    if (await saveGoal(ng)){ $("modal").classList.add("hidden"); toast(); loadGoals(); }
+  };
+  if (g.id) $("m-del").onclick=async()=>{ if(!confirm("Eliminare questo obiettivo?")) return;
+    const { error }=await sb.from("goals").delete().eq("id",g.id); if(error) alert(error.message); else { $("modal").classList.add("hidden"); loadGoals(); } };
+}
+$("b-newgoal").onclick=()=>goalModal(null);
+$("modal").addEventListener("click",e=>{ if(e.target.id==="modal") $("modal").classList.add("hidden"); });
+
+/* ================= PROGRESSI ================= */
+const IDENTITY = [
+  ["Calmo",              r=>[N(r.meditation_min)>=10, N(r.impulsive)===0, r.presence==null?null:r.presence>=4]],
+  ["Maturo",             r=>[N(r.impulsive)===0 || r.pause_used, N(r.irony_defense)===0, !r.self_insult]],
+  ["Sicuro di sé",       r=>[!r.chased, N(r.new_conversations)>0, r.presence==null?null:r.presence>=4]],
+  ["Disciplinato",       r=>[r.wake_730, r.priority_done, r.gym||r.tennis||r.other_sport, N(r.stretching_min)>=10]],
+  ["Desiderabile & rispettato", r=>[r.dressed_well, r.healthy_food, N(r.alcohol_drinks)<=1, N(r.irony_defense)===0]],
+  ["Solido emotivamente",r=>[!r.self_insult, !r.chased, N(r.impulsive)===0]]
+];
+function areaScores(rows, goals){
+  const today=new Date(), mon=mondayOf(today), elapsed=dayOfWeek();
+  const weeks=[0,1,2,3].map(i=>{ const s=addDays(mon,-7*i), e=addDays(s,6);
+    return {rows:rows.filter(r=>r.day>=localISO(s)&&r.day<=localISO(e)), scale:i===0?elapsed/7:1}; }).filter(w=>w.rows.length);
+  const out={};
+  for (const a of Object.keys(AREAS)){
+    const ps=[]; TARGETS.filter(T=>T.a===a && T.ty!=="month").forEach(T=>weeks.forEach(w=>{ const e=evalT(T,w.rows,T.ty==="max"?1:w.scale); if(e.p!=null) ps.push(e.p); }));
+    const hab = ps.length ? ps.reduce((x,y)=>x+y,0)/ps.length : null;
+    const gs=goals.filter(g=>g.area===a && g.status==="attivo" && g.kind!=="identita");
+    const gp = gs.length ? gs.reduce((x,g)=>x+goalProgress(g),0)/gs.length/100 : null;
+    const s = hab!=null && gp!=null ? hab*.6+gp*.4 : (hab ?? gp);
+    out[a]={s, hab, gp, n:gs.length};
+  }
+  return out;
+}
+async function loadProg(){
+  const today=new Date();
+  try{
+    const from=addDays(mondayOf(today),-49);
+    const [rows, gs, items, done] = await Promise.all([fetchRows(localISO(from),null), fetchGoals(), fetchItems().catch(()=>[]), fetchDone(localISO(addDays(today,-13)),null).catch(()=>[])]);
+    const r28=rows.filter(r=>r.day>=localISO(addDays(today,-34)));
+    const sc=areaScores(r28,gs), vals=Object.values(sc).map(x=>x.s).filter(x=>x!=null);
+    $("p-total").textContent = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*100) : "–";
+    $("p-areas").innerHTML = Object.entries(AREAS).map(([a,l])=>{ const x=sc[a];
+      return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><span>${l}</span><b>${x.s==null?"–":Math.round(x.s*100)}</b></div>
+      <div class="bar"><i style="width:${(x.s||0)*100}%;background:${colOf(x.s)}"></i></div>
+      <div class="mut">abitudini ${x.hab==null?"nessun dato":Math.round(x.hab*100)+"%"} · obiettivi ${x.gp==null?"–":Math.round(x.gp*100)+"%"} (${x.n} attivi)</div></div>`; }).join("");
+    // grafico settimane
+    const mon=mondayOf(today), elapsed=dayOfWeek();
+    const wk=[...Array(8)].map((_,i)=>{ const s=addDays(from,7*i), e=addDays(s,6); const rr=rows.filter(r=>r.day>=localISO(s)&&r.day<=localISO(e));
+      const ws=rr.length?weekScore(rr, i===7?elapsed/7:1):null; return {l:fmtD(localISO(s)), v:ws==null?null:Math.round(ws*100)}; });
+    drawChart("c-weeks",{type:"line",data:{labels:wk.map(w=>w.l),datasets:[{label:"Aderenza %",data:wk.map(w=>w.v),borderColor:"#38bdf8",backgroundColor:"rgba(56,189,248,.15)",fill:true,tension:.3,spanGaps:true,pointRadius:4},
+      refLine("Obiettivo 80%",8,80,"#22c55e")]},options:{scales:{y:{min:0,max:100}},plugins:{legend:{display:false}}}});
+    drawChart("c-radar",{type:"radar",data:{labels:Object.values(AREAS).map(l=>l.split(" & ")[0]),datasets:[{label:"Punteggio",data:Object.keys(AREAS).map(a=>sc[a].s==null?0:Math.round(sc[a].s*100)),
+      borderColor:"#38bdf8",backgroundColor:"rgba(56,189,248,.25)",pointRadius:3}]},options:{scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:"#334155"},angleLines:{color:"#334155"},pointLabels:{color:"#e2e8f0",font:{size:11}}}},plugins:{legend:{display:false}}}});
+    // routine 14 giorni
+    const days14=[...Array(14)].map((_,i)=>localISO(addDays(today,-13+i)));
+    const pct=(rt,d)=>{ const its=items.filter(i=>i.routine===rt&&i.active); if(!its.length) return null; const ids=new Set(its.map(i=>i.id));
+      return Math.round(done.filter(x=>x.day===d&&ids.has(x.item_id)).length/its.length*100); };
+    drawChart("c-routine",{type:"bar",data:{labels:days14.map(fmtD),datasets:[{label:"Mattina",data:days14.map(d=>pct("mattina",d)),backgroundColor:"#facc15"},{label:"Sera",data:days14.map(d=>pct("sera",d)),backgroundColor:"#a78bfa"}]},
+      options:{scales:{y:{min:0,max:100}},plugins:{legend:{labels:{boxWidth:10}}}}});
+    // umore
+    const r30=rows.filter(r=>r.day>=localISO(addDays(today,-29)));
+    drawChart("c-mood",{type:"line",data:{labels:r30.map(r=>fmtD(r.day)),datasets:[
+      {label:"Energia",data:r30.map(r=>r.energy),borderColor:"#facc15",tension:.3,spanGaps:true},
+      {label:"Calma/presenza",data:r30.map(r=>r.presence),borderColor:"#38bdf8",tension:.3,spanGaps:true},
+      {label:"Reazioni impulsive",data:r30.map(r=>N(r.impulsive)),borderColor:"#ef4444",backgroundColor:"#ef4444",type:"bar"}]},
+      options:{scales:{y:{min:0,max:5}},plugins:{legend:{labels:{boxWidth:10}}}}});
+    const last14=rows.filter(r=>r.day>=localISO(addDays(today,-13)));
+    $("p-id").innerHTML = last14.length ? IDENTITY.map(([l,fn])=>{ let ok=0,tot=0; last14.forEach(r=>fn(r).forEach(v=>{ if(v!=null){tot++; if(v) ok++;} }));
+      const p=tot?ok/tot:null; return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><span>${l}</span><b>${p==null?"–":Math.round(p*100)+"%"}</b></div><div class="bar"><i style="width:${(p||0)*100}%;background:${colOf(p)}"></i></div></div>`; }).join("")
+      : `<div class="mut">Servono alcuni check-in.</div>`;
+    const map=Object.fromEntries(rows.map(r=>[r.day,r])); let cells=""; const f35=addDays(today,-34);
+    for(let i=0;i<35;i++){ const d=addDays(f35,i), r=map[localISO(d)];
+      if(!r){ cells+=`<div style="opacity:.35">${d.getDate()}</div>`; continue; }
+      const n=[r.wake_730, r.gym||r.tennis||r.other_sport, N(r.stretching_min)>=10, N(r.meditation_min)>=10, N(r.spanish_min)>=20, r.priority_done].filter(Boolean).length;
+      cells+=`<div style="background:${["#334155","#7f1d1d","#9a3412","#a16207","#4d7c0f","#15803d","#16a34a"][n]}" title="${r.day}">${n}</div>`; }
+    $("h-grid").innerHTML=cells;
+    const ms=localISO(new Date(today.getFullYear(),today.getMonth(),1,12)), mr=rows.filter(r=>r.day>=ms);
+    const { data:revs } = await sb.from("weekly_reviews").select("books_finished,week_start").gte("week_start",localISO(addDays(new Date(ms+"T12:00"),-6)));
+    const books=(revs||[]).reduce((a,r)=>a+(r.books_finished||0),0);
+    const sum=k=>mr.reduce((a,r)=>a+N(r[k]),0), cnt=k=>mr.filter(r=>r[k]).length;
+    $("p-month").innerHTML=[["Giorni registrati",mr.length],["Allenamenti (palestra + tennis + altro)",cnt("gym")+cnt("tennis")+cnt("other_sport")],
+      ["Contatti senior (obiettivo 2)",cnt("senior_contact")],["Libri finiti (obiettivo 1)",books],["Ore attività parallela",sum("project_hours")],
+      ["Persone nuove conosciute",sum("new_conversations")],["Reazioni impulsive",sum("impulsive")],["Drink alcolici",sum("alcohol_drinks")],["Azioni casa",cnt("house_action")]]
+      .map(([l,v])=>`<div class="row"><span>${l}</span><b>${Math.round(v*10)/10}</b></div>`).join("");
+  }catch(e){ $("p-areas").innerHTML=`<div class="err">${esc(e.message)}</div>`; }
 }
 
-/* ---------- storico ---------- */
-async function loadHist(){
-  const from=new Date(); from.setDate(from.getDate()-34);
-  const { data=[] } = await sb.from("daily_checkins").select("*").gte("day",localISO(from)).order("day");
-  const map=Object.fromEntries(data.map(r=>[r.day,r])); let cells="";
-  for(let i=0;i<35;i++){ const d=new Date(from); d.setDate(from.getDate()+i); const r=map[localISO(d)];
-    if(!r){ cells+=`<div title="${localISO(d)}" style="opacity:.35">·</div>`; continue; }
-    const n=(r.gym||r.tennis?1:0)+(r.stretching_min>=10?1:0)+(r.meditation_min>=5?1:0)+(r.spanish_min>=15?1:0)+(r.priority_done?1:0);
-    const bg=["#334155","#7f1d1d","#92400e","#a16207","#15803d","#16a34a"][n];
-    cells+=`<div style="background:${bg}" title="${r.day}">${n}</div>`; }
-  $("h-grid").innerHTML=cells;
-  const last=data.filter(r=>new Date(r.day)>=new Date(Date.now()-30*864e5)), n=last.length||1;
-  const avg=k=>(last.reduce((a,r)=>a+(Number(r[k])||0),0)/n).toFixed(1);
-  const cnt=k=>last.filter(r=>r[k]).length;
-  $("h-avg").innerHTML = [["Giorni registrati",last.length],["Allenamenti (palestra+tennis)",cnt("gym")+cnt("tennis")],["Meditazione media (min/giorno)",avg("meditation_min")],
-    ["Spagnolo medio (min/giorno)",avg("spanish_min")],["Reazioni impulsive totali",last.reduce((a,r)=>a+(r.impulsive||0),0)],["Energia media",avg("energy")],["Ore progetto totali",last.reduce((a,r)=>a+Number(r.project_hours||0),0)]]
-    .map(([l,v])=>`<div class="row"><span>${l}</span><b>${v}</b></div>`).join("");
+/* ================= LISTE INIZIALI ================= */
+const S = (...a) => a.map(t=>({t:t.replace(/^\*/,""), d:t.startsWith("*")}));
+const SEED = [
+  ["identita","identita","Calmo","Parlo lentamente e con pause. Respiro 2 secondi prima di rispondere. Niente ironia o sarcasmo come scudo. Non provoco."],
+  ["identita","identita","Maturo","Non reagisco a caldo (regola 10 minuti). Spiego cosa sento senza drammi. Confini chiari. Non cerco approvazione."],
+  ["identita","identita","Sicuro di sé","Pochi messaggi, chiari. Non inseguo nessuno. Non ho paura del silenzio. Agisco, non rimugino. Niente paragoni."],
+  ["identita","identita","Disciplinato","Sveglia 7:30 e palestra anche se ho dormito male. Lingue ogni giorno. Porto a termine ciò che inizio. Routine settimanale."],
+  ["identita","identita","Desiderabile & rispettato","Vestito bene sempre. Mi muovo lento e deciso. Parlo poco e preciso, zero buffonate. Affidabile: se dico che ci sono, ci sono."],
+  ["identita","identita","Solido emotivamente","Non reagisco ai trigger. Accetto il rifiuto. Sto bene da solo, in abbondanza e non nel bisogno. Mi correggo, non mi distruggo."],
+];
+const SEEDG = [
+ ["corpo","abitudine","Mi sveglio alle 7:30 per andare in palestra","Sveglia 7:30 + palestra (check-in)","Palestra 3-4/sett · sveglia 7:30 5 giorni","attivo",40,"Prepara la borsa la sera prima e fissa 3 giorni fissi"],
+ ["corpo","abitudine","Sono flessibile: stretching ogni giorno","Stretching ≥10 min","6 giorni a settimana","attivo",10,"10 minuti nella routine del mattino"],
+ ["corpo","abitudine","Gioco a tennis con regolarità","Sessioni di tennis","2 a settimana","attivo",100,"Mantenere le 2 sessioni fisse"],
+ ["corpo","risultato","Fisico da obiettivo: peso 69-75 kg, girovita < 79 cm","Misure settimanali (tab Corpo)","Proporzioni Steve Reeves","attivo",0,"Pesati e misurati ogni settimana, stesso giorno"],
+ ["corpo","abitudine","Mangio equilibrato (80/20)","Giorni puliti","5 giorni su 7","attivo",50,"Pianifica la spesa della settimana la domenica"],
+ ["corpo","abitudine","Bevo poco alcol","Drink a settimana","Massimo 4","attivo",50,"Decidi in anticipo il limite prima di uscire"],
+ ["corpo","risultato","So fare surf","Tappe","Prendere onde verdi da solo","backlog",0,"Prenota una lezione di prova",S("Lezione di prova","5 lezioni completate","Pop-up fluido","Prendo onde verdi da solo")],
+ ["corpo","risultato","Faccio judo (disciplina, meno competitività)","Tappe","1 allenamento a settimana per 2 mesi","backlog",0,"Trova un dojo vicino e fai la lezione di prova",S("Dojo trovato","Lezione di prova","8 allenamenti","2 mesi di costanza")],
+ ["mente","abitudine","Medito 10 minuti ogni giorno","Meditazione ≥10 min","6 giorni a settimana","attivo",10,"Nella routine del mattino, prima del telefono"],
+ ["mente","abitudine","Leggo per meditare","Lettura ≥10 min","5 giorni a settimana","attivo",15,"Libro sul comodino, telefono fuori dalla camera"],
+ ["mente","risultato","Leggo almeno 1 libro al mese","Libri finiti (review)","12 all'anno","attivo",15,"Scegli il libro del mese"],
+ ["mente","abitudine","Journaling 3 volte a settimana","Journaling","3 a settimana","attivo",0,"5 righe la sera: cosa è successo, cosa ho sentito, cosa correggo"],
+ ["mente","regola","Domenica sacra e 1 ora a settimana senza telefono","Check nella review","Ogni settimana","attivo",20,"Blocca la domenica mattina in calendario"],
+ ["comunicazione","regola","Regola 10 minuti: niente risposte a caldo","Reazioni impulsive","0 a settimana","attivo",40,"Se mi irrito: bozza, 10 minuti, poi rileggo e invio"],
+ ["comunicazione","regola","Parlo con calma e lentamente con chiunque","Voto presenza (1-5)","Media ≥4","attivo",35,"Pausa di 1 secondo prima di ogni risposta"],
+ ["comunicazione","regola","Parlo il 20% del tempo","Voto presenza (1-5)","Media ≥4","attivo",30,"Una domanda in più invece di una frase in più"],
+ ["comunicazione","regola","Niente buffonate: cose serie in 20 secondi","Ironia come difesa","Massimo 1 a settimana","attivo",35,"Invece della battuta: «Aspetta, ti spiego cosa intendo»"],
+ ["comunicazione","risultato","So sintetizzare idee complesse in 1 minuto","Registrazioni di 60 secondi","1 a settimana","attivo",0,"Registra un pitch di 60 secondi sul tuo lavoro e riascoltalo",
+   S("Prima registrazione di 60 secondi","4 registrazioni (1 al mese)","Struttura punto-perché-azione usata in 3 riunioni","Feedback positivo da un senior")],
+ ["comunicazione","regola","Nel lavoro sono tranquillo e non prendo nulla sul personale","Reazioni impulsive a lavoro","0","attivo",40,"Separa il problema dal mio valore: correggo il processo"],
+ ["comunicazione","regola","Non sono più competitivo","Episodi annotati nel journaling","In calo","attivo",35,"Nota quando ti paragoni a qualcuno e cosa c'era sotto"],
+ ["comunicazione","regola","Ascolto prima di risolvere","Principio nella tab Routine","Sempre","attivo",30,"Rileggi il principio prima delle conversazioni importanti"],
+ ["lingue","risultato","Parlo spagnolo fluido","Spagnolo ≥20 min","5 giorni a settimana · C1","attivo",0,"Fai un test di livello online",
+   S("*Uso quotidiano a Madrid","Test di livello fatto","20 min al giorno per 8 settimane","1 lezione a settimana","Riunione di 30 min tutta in spagnolo","Certificazione DELE")],
+ ["lingue","risultato","Parlo francese (B2)","Francese ≥20 min","3 giorni a settimana · B2","attivo",0,"Scegli un metodo (corso o tutor) e fai il test di livello",
+   S("Test di livello","Metodo scelto","Livello A2","Livello B1","Livello B2")],
+ ["lingue","risultato","Ho una corretta pronuncia in inglese","Sessioni pronuncia 15 min","3 a settimana","attivo",0,"Registra 1 minuto di parlato come baseline",
+   S("Registrazione baseline","Feedback da coach o tutor","12 settimane di allenamento","Nuova registrazione e confronto")],
+ ["carriera","risultato","Strategia di crescita con sponsor, mentor e obiettivo","Tappe","Piano scritto e condiviso","attivo",0,"Scrivi il ruolo che vuoi tra 2 anni",
+   S("Ruolo target a 2 anni definito","Gap di competenze mappati","Mentor identificato e contattato","Sponsor identificato","Conversazione di sviluppo con il manager")],
+ ["carriera","abitudine","Network solido: 2 contatti senior nuovi al mese","Contatti senior","2 al mese","attivo",20,"Scegli 2 senior da contattare questo mese"],
+ ["carriera","risultato","Ho una skill hard chiara e monetizzabile","Tappe","Prima vendita","attivo",0,"Scrivi in 2 frasi cosa sai fare e per chi",
+   S("*Skill individuata: analisi commerciale + AI per decisioni di vendita","Offerta scritta in una pagina","Caso demo non confidenziale","3 conversazioni con potenziali clienti","Primo incarico pagato")],
+ ["carriera","risultato","Ingresso attivo da un'attività di 3-4 ore a settimana","Ore attività parallela","3 ore a settimana","attivo",0,"Definisci l'offerta (anche l'idea evento circoletti con gente pagante)",
+   S("Offerta definita","Primo cliente","4 settimane consecutive","Entrata mensile ricorrente")],
+ ["carriera","abitudine","Focus 90 minuti al giorno senza distrazioni","Focus 90 min","5 giorni a settimana","attivo",40,"Blocca 90 minuti in calendario ogni mattina, notifiche spente"],
+ ["carriera","risultato","Idea di business con piano e ricerca di investimento","Tappe","Pitch presentato","backlog",0,"Prima la skill monetizzabile, poi questo",
+   S("3 idee scritte","Problema validato con 10 interviste","MVP o prototipo","Business plan","Pitch deck","Primi contatti con investitori")],
+ ["finanze","risultato","Ho comprato una casa","Tappe","Rogito","attivo",0,"Chiedi la pre-approvazione del mutuo a 2 banche",
+   S("*Budget e zone definite","Pre-approvazione mutuo","10 visite fatte","Shortlist di 3","Offerta","Rogito")],
+ ["finanze","risultato","Ingressi passivi con investimento cumulativo","Tappe","Rendita passiva mensile","attivo",0,"Imposta un piano di accumulo automatico mensile",
+   S("*Deposito, BTP, fondo e Trading212 attivi","Investimento mensile automatico","Obiettivo di rendita mensile definito","Rendita passiva che copre una spesa fissa")],
+ ["finanze","risultato","Piano finanziario chiaro: saving rate, investimento, orizzonte","Tappe","Documento di una pagina","attivo",0,"Calcola il saving rate degli ultimi 3 mesi",
+   S("*Patrimonio mappato","Saving rate calcolato e target fissato","Importo mensile automatico deciso","Fondo casa separato","Orizzonte e obiettivo scritti")],
+ ["finanze","abitudine","Controllo spese ogni domenica","Check nella review","Ogni settimana","attivo",30,"10 minuti la domenica dopo la review"],
+ ["sociale","abitudine","Conosco persone nuove ogni giorno","Persone nuove conosciute","5 a settimana (obiettivo originale: 2 al giorno)","attivo",20,"Una domanda o un commento leggero, energia calma"],
+ ["sociale","regola","Non inseguo più nessuno, zero messaggi a raffica","Episodi di inseguimento","0","attivo",50,"Nessun interesse = mi stacco. Un messaggio, poi silenzio"],
+ ["sociale","abitudine","Cura estetica e vestiti selezionati","Curato e vestito bene","5 giorni a settimana","attivo",50,"Prepara i vestiti la sera prima"],
+ ["sociale","regola","Confini chiari e circolo sociale selezionato","Episodi annotati nel journaling","Sempre","attivo",40,"«Così non mi va bene» detto con calma"],
+ ["sociale","abitudine","Connessione con chi ami","Messaggio o chiamata (routine)","Ogni giorno","attivo",30,"Nella routine del mattino"],
+ ["sociale","risultato","Viaggio 3 volte l'anno","Viaggi fatti","3 all'anno","attivo",0,"Segna i viaggi fatti nel 2026",
+   S("Viaggio 1","Viaggio 2","*Viaggio 3 prenotato: Seul + Thailandia")],
+ ["sociale","risultato","Ho un hobby creativo","Hobby creativo","1 volta a settimana","attivo",0,"Scegline uno (fotografia, scrittura, musica) e provalo 4 volte",
+   S("Hobby scelto","4 sessioni","Primo progetto finito")]
+];
+async function seedGoals(){
+  const rows=[...SEED.map(([a,k,t,n],i)=>({user_id:UID,area:a,kind:k,title:t,notes:n,status:"attivo",progress:0,sort:i})),
+    ...SEEDG.map(([a,k,t,m,tg,st,p,na,steps],i)=>({user_id:UID,area:a,kind:k,title:t,metric:m,target:tg,status:st,
+      progress: steps&&steps.length ? Math.round(steps.filter(s=>s.d).length/steps.length*100) : p, next_action:na, steps:steps||[], sort:100+i}))];
+  const { error } = await sb.from("goals").insert(rows); if (error) throw error;
 }
+const LISTEN = `Quando qualcuno mi racconta un'emozione o un problema:
 
-/* ---------- backup ---------- */
-async function allRows(){ const { data=[] }=await sb.from("daily_checkins").select("*").order("day"); return data; }
+1. Fermati. Non cercare subito la soluzione.
+2. Ascolta almeno 2 minuti senza interrompere.
+3. Fai domande per capire, non per giudicare:
+   · Cosa ti manca di più?
+   · Cosa ti ha fatto stare così?
+   · Cosa ti ha fatto più male?
+   · Come ti sei sentito?
+   · Cosa ti farebbe stare meglio?
+4. Fai sentire l'altra persona capita:
+   · "Capisco perché ti senti così."
+   · "Ha senso che tu ci sia rimasto male, è pesante."
+5. Solo dopo chiedi: "Vuoi che ti ascolti o vuoi un consiglio?"
+6. Se non chiede una soluzione, continua ad ascoltare.
+
+Ricorda: le persone raramente cercano subito una soluzione. Prima vogliono sentirsi comprese.
+
+Domande utili:
+· "Quando hai iniziato a sentirti così?"
+· "Qual è il momento in cui ti sei sentita più sola nella relazione?"
+· "Cosa ti sarebbe servito da parte mia?"
+· "Cosa ti fa pensare che non stia funzionando?"`;
+const SEEDR = [
+  // routine, emoji, titolo, minuti, link, contesto
+  ["mattina","⏰","Sveglia alle 7:30",1,"wake_730",""],
+  ["mattina","🤸","Stretching 10 minuti",10,"stretching_min:10","Collo, spalle, anche, flessori, femorali. Per tennis, palestra e postura."],
+  ["mattina","🛏️","Rifai il letto",2,"",""],
+  ["mattina","💬","Pep talk: chi sono oggi",3,"","Calmo · Maturo · Sicuro di sé · Disciplinato · Desiderabile & rispettato · Solido emotivamente.\n\nOggi parlo lentamente, ascolto l'80%, non reagisco a caldo."],
+  ["mattina","🪥","Lavati i denti",1,"",""],
+  ["mattina","🧘","Meditazione 10 minuti",10,"meditation_min:10","Seduto, occhi chiusi, respiro. Quando la mente scappa, torni al respiro senza giudicarti."],
+  ["mattina","💊","Integratori / vitamine",1,"",""],
+  ["mattina","📋","Guarda e aggiusta la to-do list",2,"",""],
+  ["mattina","🎯","Scrivi le 3 cose da terminare oggi (One Big Thing)",2,"","Una delle tre è la One Big Thing: se fai solo quella, la giornata è vinta."],
+  ["mattina","🇪🇸","Metti in calendario 20 min di spagnolo",1,"",""],
+  ["mattina","🔥","Come bruci 800 kcal oggi?",1,"","Palestra, tennis, camminata: decidi adesso quando e mettilo in calendario."],
+  ["mattina","❤️","Manda un messaggio o chiama chi ami",1,"",""],
+  ["sera","🎯","One Big Thing: hai concluso almeno uno dei grandi obiettivi di oggi?",1,"priority_done",""],
+  ["sera","🐢","Hai parlato lentamente e con pause? Ascoltato l'80%? Respirato 2 sec prima di rispondere?",1,"","Dai il voto 1-5 nel check-in (Calma e presenza)."],
+  ["sera","🧩","Hai articolato i concetti in modo strutturato?",1,"","Dove dobbiamo arrivare, per ottenere cosa, dove siamo adesso."],
+  ["sera","🙏","3 punti di forza e 2 risultati raggiunti: sii grato",2,"",""],
+  ["sera","🎾","Evento di circoletti? Gente pagante",1,"",""],
+  ["sera","📋","Aggiusta la to-do list di domani",2,"",""],
+  ["sera","✅","Fai il check-in del giorno",2,"",""],
+  ["principi","👂","ASCOLTA PRIMA DI RISOLVERE",0,"",LISTEN],
+  ["principi","🐢","Parla lentamente, ascolta l'80%",0,"","Pausa di 1 secondo prima di rispondere. Respira 2 secondi. Frasi brevi. Il silenzio non va riempito."],
+  ["principi","🧩","Comunica in modo strutturato",0,"","1. Dove dobbiamo arrivare\n2. Per ottenere cosa\n3. Dove siamo adesso\n\nIl messaggio chiave deve stare in 20 secondi."],
+  ["principi","⏱️","Regola dei 10 minuti",0,"","Se un messaggio mi irrita: scrivo la bozza, aspetto 10 minuti, rileggo, poi invio. Mai a caldo."]
+];
+async function seedRoutine(){
+  const rows=SEEDR.map(([rt,e,t,m,l,c],i)=>({user_id:UID,routine:rt,emoji:e,title:t,minutes:m,link:l||null,context:c||null,sort:i+1}));
+  const { error } = await sb.from("routine_items").insert(rows); if (error) throw error;
+}
+$("b-seed").onclick=async()=>{ const g=await fetchGoals(); if(g.length && !confirm(`Hai già ${g.length} obiettivi. Aggiungere comunque la lista iniziale (avrai doppioni)?`)) return;
+  try{ await seedGoals(); toast("Obiettivi caricati ✓"); }catch(e){ alert(e.message); } };
+$("b-seedr").onclick=async()=>{ const it=await fetchItems(); if(it.length && !confirm(`Hai già ${it.length} voci di routine. Aggiungere comunque quella iniziale (avrai doppioni)?`)) return;
+  try{ await seedRoutine(); toast("Routine caricata ✓"); }catch(e){ alert(e.message); } };
+
+/* ================= BACKUP / REPORT ================= */
 function download(name,txt,type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type})); a.download=name; a.click(); }
-$("b-json").onclick=async()=>download(`francesco-os-${localISO(new Date())}.json`,JSON.stringify(await allRows(),null,2),"application/json");
-$("b-csv").onclick=async()=>{ const rows=await allRows(); if(!rows.length) return alert("Nessun dato");
-  const cols=Object.keys(rows[0]).filter(c=>c!=="user_id"); const esc=v=>`"${String(v??"").replace(/"/g,'""')}"`;
-  download(`francesco-os-${localISO(new Date())}.csv`,"\ufeff"+[cols.join(";"),...rows.map(r=>cols.map(c=>esc(r[c])).join(";"))].join("\n"),"text/csv"); };
+function toCSV(rows){ const cols=Object.keys(rows[0]).filter(c=>c!=="user_id"); const q=v=>`"${String(typeof v==="object"&&v!==null?JSON.stringify(v):v??"").replace(/"/g,'""')}"`;
+  return "\ufeff"+[cols.join(";"),...rows.map(r=>cols.map(c=>q(r[c])).join(";"))].join("\n"); }
+$("b-json").onclick=async()=>{ const [c,g,r,it,b,s]=await Promise.all([fetchRows(), fetchGoals(), sb.from("weekly_reviews").select("*").order("week_start"), fetchItems(), fetchBody(), sb.from("user_settings").select("*")]);
+  const d = await sb.from("routine_done").select("*").order("day");
+  download(`francesco-os-${localISO(new Date())}.json`, JSON.stringify({exported:new Date().toISOString(), checkins:c, goals:g, reviews:r.data||[], routine_items:it, routine_done:d.data||[], body:b, settings:s.data||[]},null,2),"application/json"); };
+$("b-csv").onclick=async()=>{ const rows=await fetchRows(); if(!rows.length) return alert("Nessun dato"); download(`checkin-${localISO(new Date())}.csv`,toCSV(rows),"text/csv"); };
+$("b-csvbody").onclick=async()=>{ const rows=await fetchBody(); if(!rows.length) return alert("Nessun dato"); download(`corpo-${localISO(new Date())}.csv`,toCSV(rows),"text/csv"); };
+$("b-report").onclick=async()=>{
+  const today=new Date(), rows=await fetchRows(localISO(addDays(today,-27)),null), gs=await fetchGoals();
+  const [{ data:revs }, items, done, body] = await Promise.all([sb.from("weekly_reviews").select("*").order("week_start",{ascending:false}).limit(4),
+    fetchItems().catch(()=>[]), fetchDone(localISO(addDays(today,-27)),null).catch(()=>[]), fetchBody().catch(()=>[])]);
+  await loadSettings();
+  const sc=areaScores(rows,gs);
+  let t=`FRANCESCO OS — report ${localISO(today)} (ultime 4 settimane, ${rows.length} giorni registrati)\n\nPUNTEGGI AREE\n`;
+  for(const [a,l] of Object.entries(AREAS)){ const x=sc[a]; t+=`- ${l}: ${x.s==null?"n.d.":Math.round(x.s*100)} (abitudini ${x.hab==null?"n.d.":Math.round(x.hab*100)+"%"}, obiettivi ${x.gp==null?"n.d.":Math.round(x.gp*100)+"%"})\n`; }
+  t+=`\nTARGET (totale 4 settimane; target settimanale x4)\n`;
+  TARGETS.filter(T=>T.ty!=="month").forEach(T=>{ const e=evalT(T,rows,4); t+=`- ${T.l}: ${e.v??"n.d."} (target sett. ${T.t})\n`; });
+  t+=`\nROUTINE (completamento medio 28 giorni)\n`;
+  for (const rt of ["mattina","sera"]){ const its=items.filter(i=>i.routine===rt&&i.active); if(!its.length) continue; const ids=new Set(its.map(i=>i.id));
+    const c=done.filter(d=>ids.has(d.item_id)).length; t+=`- ${rt}: ${Math.round(c/(its.length*28)*100)}% · voci più saltate: ${its.map(i=>({t:i.title,n:done.filter(d=>d.item_id===i.id).length})).sort((a,b)=>a.n-b.n).slice(0,3).map(x=>`${x.t} (${x.n}/28)`).join("; ")}\n`; }
+  t+=`\nCORPO (altezza ${SET.height} cm; obiettivi peso ${SET.w_min}-${SET.w_max}, girovita <${SET.waist_aes})\n`+body.slice(-6).map(r=>`${r.day}: `+BM.filter(([k])=>r[k]!=null).map(([k,l])=>`${l} ${r[k]}`).join(", ")).join("\n");
+  t+=`\n\nOBIETTIVI ATTIVI\n`+gs.filter(g=>g.status==="attivo"&&g.kind!=="identita").map(g=>`- [${AREAS[g.area]||g.area}] ${g.title}: ${goalProgress(g)}% → ${g.next_action||"-"}`).join("\n");
+  t+=`\n\nREVIEW RECENTI\n`+(revs||[]).map(r=>`${r.week_start}: meglio="${r.best||""}" · debole="${r.weak||""}" · fermo="${r.stalled||""}" · priorità=${[r.p1,r.p2,r.p3].filter(Boolean).join(" | ")}`).join("\n");
+  t+=`\n\nNOTE GIORNALIERE\n`+rows.filter(r=>r.note).map(r=>`${r.day}: ${r.note}`).join("\n");
+  t+=`\n\nAnalizza questi dati come un coach diretto: cosa sta migliorando, cosa peggiora, dove mi racconto storie (intenzioni senza azioni), cosa dice il corpo rispetto agli allenamenti, e dammi solo 3 priorità per la prossima settimana basate sui dati.`;
+  try{ await navigator.clipboard.writeText(t); toast("Report copiato ✓"); }catch(e){ download("report.txt",t,"text/plain"); }
+};
 
-/* ---------- navigazione + auth ---------- */
+/* ================= EVENTI ================= */
+document.addEventListener("click", async e=>{
+  const b=e.target.closest("button,[data-go],[data-ro],input[data-gs]"); if(!b) return;
+  const d=b.dataset;
+  if (b.classList.contains("tog") && d.k){ state[d.k]=!state[d.k]; b.classList.toggle("on",state[d.k]); }
+  else if (b.classList.contains("tog") && d.rb){ rev[d.rb]=!rev[d.rb]; b.classList.toggle("on",rev[d.rb]); }
+  else if (d.d && d.k){ state[d.k]=Math.max(0,Math.round((N(state[d.k])+Number(d.d))*10)/10); $("n-"+d.k).textContent=state[d.k]; }
+  else if (d.n){ const k=b.parentElement.dataset.k, n=Number(d.n); state[k]=state[k]===n?null:n; b.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("sel",Number(x.dataset.n)===state[k])); }
+  else if (d.rn){ rev.books_finished=Math.max(0,(rev.books_finished||0)+Number(d.rn)); $("rv-books").textContent=rev.books_finished; }
+  else if (d.rr){ const n=Number(d.rr); rev.rating=rev.rating===n?null:n; $("rv-rate").querySelectorAll("button").forEach(x=>x.classList.toggle("sel",Number(x.dataset.rr)===rev.rating)); }
+  else if (d.v){ if (d.rt) rtSel=d.rt; show(d.v); }
+  else if (d.rs){ rtSel=d.rs; rOpen=null; loadRoutine(); }
+  else if (d.rc){ await toggleItem(Number(d.rc)); loadRoutine(); }
+  else if (d.ro){ rOpen = rOpen===Number(d.ro) ? null : Number(d.ro); loadRoutine(); }
+  else if (d.re){ itemModal(rItems.find(i=>i.id===Number(d.re))); }
+  else if (d.radd){ itemModal(null, d.radd); }
+  else if (d.bm){ measureModal(bodyRows.find(r=>r.id===Number(d.bm))); }
+  else if (d.gf){ gFilter=d.gf; openGoal=null; loadGoals(); }
+  else if (d.go){ openGoal = openGoal===Number(d.go) ? null : Number(d.go); loadGoals(); }
+  else if (d.ge){ goalModal(goals.find(g=>g.id===Number(d.ge))); }
+  else if (d.gs){ const g=goals.find(x=>x.id===Number(d.gs)); g.steps[Number(d.i)].d=b.checked;
+    if (await saveGoal({id:g.id, steps:g.steps, progress:goalProgress(g)})) loadGoals(); }
+});
+$("day").addEventListener("change", loadDay);
+
+/* ================= NAVIGAZIONE + LOGIN ================= */
+const VIEWS=["login","today","routine","body","week","goals","prog","more"];
 function show(v){
-  ["login","today","week","hist","more"].forEach(x=>$("v-"+x).classList.toggle("hidden",x!==v));
+  VIEWS.forEach(x=>$("v-"+x).classList.toggle("hidden",x!==v));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("act",b.dataset.v===v));
-  if(v==="week") loadWeek(); if(v==="hist") loadHist(); window.scrollTo(0,0);
+  if(v==="today"){ if(dirtyDay) loadDay(); loadFocus(); }
+  if(v==="routine") loadRoutine(); if(v==="body") loadBody(); if(v==="week") loadWeek(); if(v==="goals") loadGoals(); if(v==="prog") loadProg();
+  window.scrollTo(0,0);
 }
 async function boot(){
   const { data:{ session } } = await sb.auth.getSession();
-  if(!session){ $("nav").classList.add("hidden"); $("who").textContent=""; show("login"); return; }
-  $("who").textContent=session.user.email.split("@")[0]; $("nav").classList.remove("hidden");
+  if(!session){ $("nav").classList.add("hidden"); $("b-more").classList.add("hidden"); $("who").textContent=""; show("login"); return; }
+  UID=session.user.id;
+  $("who").textContent=session.user.email.split("@")[0]; $("nav").classList.remove("hidden"); $("b-more").classList.remove("hidden");
   $("sub").textContent=new Date().toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});
-  $("day").value=localISO(new Date()); await loadDay(); show("today");
+  $("day").value=localISO(new Date()); rtSel=rtDefault();
+  try{ const g=await fetchGoals(); if(!g.length) await seedGoals(); }catch(e){}
+  try{ const it=await fetchItems(); if(!it.length) await seedRoutine(); }catch(e){}
+  try{ await loadSettings(); }catch(e){}
+  await loadDay();
+  const h=new Date().getHours();
+  show((h>=6 && h<11) ? "routine" : "today");   // al mattino si apre sulla routine
 }
 $("b-login").onclick=async()=>{ $("login-err").textContent="";
   const { error }=await sb.auth.signInWithPassword({ email:$("email").value.trim(), password:$("pwd").value });
-  if(error) $("login-err").textContent=error.message; else boot(); };
+  if(error) $("login-err").textContent = error.message==="Invalid login credentials" ? "Email o password errate. Se è la prima volta, premi «Crea account»." : error.message; else boot(); };
 $("b-signup").onclick=async()=>{ $("login-err").textContent="";
   const { data, error }=await sb.auth.signUp({ email:$("email").value.trim(), password:$("pwd").value });
   if(error) $("login-err").textContent=error.message;
-  else if(!data.session) $("login-err").textContent="Account creato. Se Supabase chiede conferma, controlla l'email e poi premi Entra.";
+  else if(!data.session) $("login-err").textContent="Account creato, ma Supabase chiede la conferma email. Disattiva «Confirm email» oppure conferma dalla mail, poi premi Entra.";
   else boot(); };
 $("b-logout").onclick=async()=>{ await sb.auth.signOut(); boot(); };
 
